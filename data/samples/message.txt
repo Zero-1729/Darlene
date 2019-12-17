@@ -1,0 +1,3 @@
+This is supposed to be a regular plain text file.
+
+We are assuming the contents of this file are a secret, and would be used to test the file encrypt/decrypt functions.

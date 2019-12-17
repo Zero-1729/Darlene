@@ -1,0 +1,30 @@
+{
+  "name": "darlene",
+  "version": "0.1.0",
+  "description": "A Symmetric Encryption Toolchain.",
+  "main": "bin/cli.js",
+  "bin": {
+    "darlene": "bin/cli.js"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "prepare": "chmod +x bin/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zero-1729/Darlene.git"
+  },
+  "keywords": [
+    "AES",
+    "Encryption"
+  ],
+  "author": "Zero-1729",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Zero-1729/Darlene/issues"
+  },
+  "homepage": "https://github.com/Zero-1729/Darlene#readme"
+}

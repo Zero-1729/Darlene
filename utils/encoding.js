@@ -19,7 +19,7 @@ const ExpandEncoding = (str) => {
 }
 
 
-const MakeBuffer = (hash, encoding, join=false) => {
+const MakeBuffer = (hash, encoding) => {
     // JS does not know what 'b64 is, so we expand it to 'base64'
     encoding = encoding == 'b64' ? ExpandEncoding(encoding) : encoding
 
@@ -27,18 +27,7 @@ const MakeBuffer = (hash, encoding, join=false) => {
         throw new Error("[Encoding Error] Encoding must be either 'hex' or 'base64'")
     }
 
-    // So we can just concatenate a long string of hashes
-    if (join) {
-        let hexed_string = ''
-
-        for (var i = 0;i < hash.length;i++) {
-            hexed_string += Buffer.isBuffer(hash[i]) ? hash[i].toString('hex') : hash[i]
-        }
-
-        return Buffer.from(hexed_string, encoding)
-    } else {
-        return Buffer.from(hash, encoding)
-    }
+    return Buffer.from(hash, encoding)
 }
 
 

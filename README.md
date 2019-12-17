@@ -14,8 +14,51 @@ This allows Darlene preserve the necessary metadata for decrypting the data late
     - [x] JSON
     - [x] String
     - [x] Buffer
-    - [x] Arrays
+    - [x] Arrays (using JSON)
     - [x] Plain Text & Binary files
+
+---
+
+# Install
+
+## Node repo
+
+```sh
+npm install -g darlene
+```
+
+## Locally
+
+```sh
+# Clone repo from GitHub
+git clone https://github.com/Zero-1729/Darlene
+
+# Enter folder and give proper executable access to cli file
+cd Darlene && npm run prepare
+
+# Gloabally install cli package 
+npm install -g . 
+
+# Note: If you get an 'EACCES' error run the command below instead
+sudo npm install -g . --unsafe-perm=true --allow-root
+```
+
+# Uninstall
+
+## Node repo
+
+```sh
+npm uninstall -g darlene
+```
+
+## Locally
+
+```sh
+npm uninstall -g .
+
+# Note: If you get an 'EACCES' error run the command below instead
+sudo npm install -g . --unsafe-perm=true --allow-root
+```
 
 ---
 
