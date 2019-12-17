@@ -17,6 +17,16 @@ const keylengths = {
     256: 'ff'
 }
 
+const getExtension = (ext) => {
+    if (!Buffer.isBuffer(ext)) {
+        return ext
+    }
+
+    // Remember the 'ext' buffer carries zeros when not filled
+    // So we have to remove all zero bytes
+    return ext.asciiSlice().replace(new RegExp('\u0000', 'g'), '')
+}
+
 const PrintContent = (data) => {
     if (Buffer.isBuffer(data)) {
         // We have a darlene data blob
@@ -164,8 +174,13 @@ const ReadFile = (fp, print=true) => {
     return content
 }
 
-const WriteFile = (fp, data) => {
-    let outfp = fp.includes('.') ? fp.slice(0, fp.lastIndexOf('.')) + '.drln' : fp + '.drln'
+const WriteFile = (fp, data, ext='drln') => {
+    if (Buffer.isBuffer(ext)) {
+        // Only attempt to sanitize if buffer
+        ext = getExtension(ext)
+    }
+
+    let outfp = fp.includes('.') ? fp.slice(0, fp.lastIndexOf('.')) + '.' + ext : fp + '.' + ext
 
     fs.writeFileSync(outfp, data)
 }
