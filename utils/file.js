@@ -1,7 +1,5 @@
 const fs = require('fs')
-const path = require('path')
 
-const { Translate } = require('./hex')
 const { AbbvEnconding, ExpandEncoding, MakeBuffer } = require('./encoding')
 
 
@@ -31,31 +29,19 @@ const PrintContent = (data) => {
     if (Buffer.isBuffer(data)) {
         // We have a darlene data blob
         let info = GetMeta(data)
-        let content = info.hashes ? info.hashes : info.hash
 
-        console.log('INFO:\n========\n')
-        console.log(`version: ${info.version}`)
-        console.log(`mode: ${info.version == 1 ? 'cbc' : 'gcm' }`)
-        console.log(`key length: ${info.keylength}`)
-        console.log(`encoding: ${info.encoding}`)
-        console.log(`hash type: ${info.flag ? 'list' : 'single'}`)
-        console.log(`hashes length: ${info.flag ? info.hash_length : '-' }`)
-        console.log(`\niv (hex): ${info.iv.toString('hex')}`)
+        console.log('\nDarlene (Info):\n--------------\n--------------\n')
+        console.log("version: ", info.version)
+        console.log("mode: ", info.version == 1 ? "cbc" : "gcm")
+        console.log("key length: ", info.keylength)
+        console.log("encoding: ", info.encoding)
+        console.log("\nJSON: ", !info.isJSON.toString())
+        console.log("\niv (hex): ", info.iv.toString('hex'))
 
-        if (info.flag) {
-            for (var i = 0;i < info.hashes_length;i++) {
-                console.log(`index: ${i}, hash: ${content[i]}`)
-            }
-        } else {
-            console.log(`\ncontent (hex): ${content.toString('hex')}`)
-        }
+        console.log("\ntag (hex): ", info.tag.toString('hex'))
+        console.log("\next (ascii): ", isEmptyBuffer(info.ext) ? '-' : info.ext.toString())
 
-        console.log(`content (is JSON): ${!info.isJSON.toString()}\n`)
-
-        console.log(`tag (hex): ${info.tag.toString('hex')}`)
-        console.log(`ext (ascii): ${isEmptyBuffer(info.ext) ? '-' : info.ext.toString()}`)
-
-        console.log('==========')
+        console.log('\n---------------\n---------------\n')
     } else {
         console.log(data)
     }
