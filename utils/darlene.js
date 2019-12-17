@@ -464,7 +464,7 @@ const EncryptFileSync = (passphrase, fp, meta) => {
     meta.iv = iv
     meta.tag = tag
     meta.hashes_length = null
-    meta.ext = null
+    meta.ext = meta.ext || null
     meta.hashes = null
 
     return meta
