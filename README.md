@@ -14,7 +14,7 @@ This allows Darlene preserve the necessary metadata for decrypting the data late
     - [x] JSON
     - [x] String
     - [x] Buffer
-    - [x] Arrays
+    - [x] Arrays (using JSON)
     - [x] Plain Text & Binary files
 
 ---
