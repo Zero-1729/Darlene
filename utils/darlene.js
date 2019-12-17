@@ -210,7 +210,10 @@ const EncryptFlat = (passphrase, data, meta) => {
 *
 */
 
-const DecryptFlat = (passphrase, meta) => {
+const DecryptFlat = (passphrase, data) => {
+    // Scrapp darlene data
+    let meta = Buffer.isBuffer(data) ? GetMeta(data) : data
+    
     let key = CreateKey(passphrase, meta.keylength/8)
     let iv = meta.iv
 
