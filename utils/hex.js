@@ -1,13 +1,3 @@
-// Alphnumric aliases
-const Alphs = {
-    'a': 10,
-    'b': 11,
-    'c': 12,
-    'd': 13,
-    'e': 14,
-    'f': 15
-}
-
 const Translate = (chr) => {
     let buff = new Buffer.alloc(1)
 
