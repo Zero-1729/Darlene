@@ -2,7 +2,7 @@ const fs = require('fs')
 
 const crypto = require('crypto')
 const { HexToBuffer } = require('./hex')
-const { WriteFile, GetMeta, ReadFile } = require('./file')
+const { CreateData, GetMeta, ReadFile } = require('./file')
 const { AbbvEnconding, ExpandEncoding } = require('./encoding')
 
 /*
@@ -467,7 +467,7 @@ const EncryptFileSync = (passphrase, fp, meta) => {
     meta.ext = meta.ext || null
     meta.hashes = null
 
-    return meta
+    return CreateData(meta)
 }
 
 
