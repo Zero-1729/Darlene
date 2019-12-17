@@ -525,10 +525,8 @@ const DecryptFileSync = (passphrase, fp) => {
 
             decrypted += decipher.final('utf8')
 
-            // Call darlene file writer
-            WriteFile(fp, decrypted, meta.ext) // ext replaces darlene ext
-
-            return decrypted
+            // Writing file should be handled externally
+            return {plain: decrypted, metas: meta}
         } catch (e) {
             if (e.message.includes('error:06065064')) {
                 throw new Error("[KeyLengthError] CBC Key Length provided is invalid")
@@ -543,10 +541,8 @@ const DecryptFileSync = (passphrase, fp) => {
         try {
             text += decipher.final('utf8')
 
-            // Call darlene file writer
-            WriteFile(fp, decrypted, meta.ext) // ext replaces darlene ext
-
-            return text
+            // Writing file should be handled externally
+            return {plain: text, metas: meta}
         } catch (e) {
             throw new Error('[AuthError] Bad or Forged tag detected!')
         }
