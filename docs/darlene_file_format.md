@@ -1,6 +1,6 @@
 # Darlene Files
 
-> **Warn**: The Darlene file structure is still experimental, and subject to change!
+> **Warn**: The Darlene file structure is still experimental, and thus subject to change!
 
 ## File Extension
 
