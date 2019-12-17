@@ -83,24 +83,6 @@ const SHA256 = (raw) => {
 
 /*
 *
-*  returns an Array of length `n`, containing evenly lengthed hashes,
-*  where `n` -> `hashes_length`
-*
-*/
-const GetEvenChunks = (buff_chunk, hashes_length) => {
-    let hashes = []
-    let hash_length = buff_chunk.length / hashes_length
-
-    for (var i = 0;i < hashes_length;i++) {
-        hashes.push(buff_chunk.slice(i*hash_length, (i*hash_length)+hash_length))
-    }
-
-    return hashes
-}
-
-
-/*
-*
 *  GetAuthTag (fn)
 *
 *  Inputs:
@@ -174,19 +156,16 @@ const EncryptFlat = (passphrase, data, meta) => {
     // Generate tag from 'passphrase', 'iv', and 'cipher text'
     let tag = meta.mode == 'gcm' ? cipher.getAuthTag() : GetAuthTag(passphrase, iv, content)
 
-    return {
+    return CreateData({
         mode: meta.mode,
         iv: iv,
         keylength: meta.keylength,
         encoding: AbbvEnconding(meta.encoding),
         tag: tag,
-        tags: null,
         hash: content,
-        hashes: null,
         isJSON: meta.isJSON,
-        hashes_length: null,
         ext: null
-    }
+    })
 }
 
 
@@ -266,154 +245,6 @@ const DecryptFlat = (passphrase, data) => {
     }
 }
 
-/* (JSON) Arrays */
-
-/*
-*  Encrypts data (string/JSON/Buffer) using using key created from passphrase.
-*  Outputs an object containing;
-*                   the Initialization Vector(iv)
-*                   and encrypted data (hash)
-*
-*  Inputs:
-*
-*  passphrase -> (String)
-*  buff -> (JSON | Array)
-*
-*  Output:
-*
-*  [object]:
-*               iv -> Initialization Vector <Buffer>
-*               hash -> (String)
-*               keylength -> <String>; defaults to '128'
-*               tag -> Auth Tag
-*               encoding -> text encoding; defaults to 'hex'
-*               mode -> AES mode; defaults to gcm
-*               isJSON -> whether encrypted data s JSON
-*
-*/
-
-const EncryptArray = (passphrase, data, meta) => {
-    let [hashes, tags] = [[], []]
-
-    // Turn JSON into string
-    if (meta.isJSON) {
-        data = JSON.parse(data)
-    }
-
-    // create cipher
-    let iv = crypto.randomBytes(16)
-    let key = CreateKey(passphrase, meta.keylength/8)
-
-    for (var i = 0;i < data.length;i++) {
-        let cipher = CreateCipher({keylength: meta.keylength, mode: meta.mode, key: key, iv: iv})
-
-        let content = cipher.update(data[i], 'utf8', meta.encoding)
-        content += cipher.final(meta.encoding)
-
-        // Generate tag from 'passphrase', 'iv', and 'cipher text'
-        let tag = meta.mode == 'gcm' ? cipher.getAuthTag() : GetAuthTag(passphrase, iv, encrypted)
-
-        hashes.push(content)
-        tags.push(tag)
-    }
-
-    return {
-        mode: meta.mode,
-        iv: iv,
-        keylength: meta.keylength,
-        encoding: AbbvEnconding(meta.encoding),
-        tag: null,
-        tags: tags,
-        hash: null,
-        hashes: hashes,
-        hashes_length: hashes.length,
-        ext: null,
-        isJSON: meta.isJSON
-    }
-}
-
-
-/*
-*
-*  Decrypts data ('hashes') using using key created from passphrase.
-*  Outputs an object containing;
-*                   the Initialization Vector(iv)
-*                   and decrypted data (text)
-*
-*  Inputs:
-*
-*  passphrase   -> (String)
-*  hashes       -> (String)
-*  iv           -> Initialization Vector
-*
-*  Output:
-*
-*  [object]:
-*               array | JSON
-*
-*/
-
-const DecryptArray = (passphrase, meta) => {
-    let key = CreateKey(passphrase, meta.keylength/8)
-    let iv = meta.iv
-    let newTag = null
-
-    let elements = []
-
-    // Check if 'iv' is hex value and convert to 16 byte buffer
-    if (!Buffer.isBuffer(meta.iv)) {
-        iv = HexToBuffer(iv, 16)
-    }
-
-    for (var i = 0;i < meta.hashes_length;i++) {
-        let decipher = CreateDecipher({keylength: meta.keylength, mode: meta.mode, key: key, iv: iv})
-
-        if (meta.mode == 'gcm') {
-            decipher.setAuthTag(meta.tags[i])
-        }
-
-        if (meta.mode == 'cbc') {
-            // Generate tag from 'passphrase', 'iv', and 'cipher text'
-            // To compare with existing tag
-            newTag = GetAuthTag(passphrase, iv, meta.hashes[i])
-
-            // If the secret passphrase, iv or ciphertext edited
-            // It will fail to encrypt
-            if (meta.tags[i] != newTag) {
-                throw new Error('[TagError] Tag Mismatch, suspecting edited inputs!')
-            }
-
-            try {
-                let decrypted = decipher.update(meta.hashes[i], ExpandEncoding(meta.encoding), 'utf8')
-
-                decrypted += decipher.final('utf8')
-
-                elements.push(decrypted)
-            } catch (e) {
-                if (e.message.includes('error:06065064')) {
-                    throw new Error("[KeyLengthError] CBC Key Length provided is invalid")
-                } else {
-                    throw new Error("[EncodingError] Provided wrong encoding for cipher text")
-                }
-            }
-        } else {
-            // GCM mode
-            let text = decipher.update(meta.hashes[i], ExpandEncoding(meta.encoding), 'utf8')
-
-            try {
-                text += decipher.final('utf8')
-
-                elements.push(text)
-            } catch (e) {
-                throw new Error('[AuthError] Bad or Forged tag detected!')
-            }
-        }
-    }
-
-    return meta.isJSON ? JSON.stringify(elements) : elements
-}
-
-
 /*
 *  Encrypts a file using using key created from passphrase.
 *  Outputs an object containing;
@@ -466,9 +297,7 @@ const EncryptFileSync = (passphrase, fp, meta) => {
     meta.hash = encrypted
     meta.iv = iv
     meta.tag = tag
-    meta.hashes_length = null
     meta.ext = meta.ext || null
-    meta.hashes = null
 
     return CreateData(meta)
 }
@@ -496,7 +325,7 @@ const EncryptFileSync = (passphrase, fp, meta) => {
 
 const DecryptFileSync = (passphrase, fp) => {
     let meta = GetMeta(ReadFile(fp))
-    let content = meta.hashes != null ? meta.hashes : meta.hash
+    let content = meta.hash
 
     let key = CreateKey(passphrase, meta.keylength/8)
     let iv = meta.iv
@@ -552,14 +381,11 @@ const DecryptFileSync = (passphrase, fp) => {
     }
 }
 
-module.exports = { GetEvenChunks,
-                   GetAuthTag,
+module.exports = { GetAuthTag,
                    CreateKey,
                    CreateCipher,
                    CreateDecipher,
                    EncryptFlat,
                    DecryptFlat,
-                   EncryptArray,
-                   DecryptArray,
                    EncryptFileSync,
                    DecryptFileSync }

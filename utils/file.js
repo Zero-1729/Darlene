@@ -78,14 +78,6 @@ const CreateData = (meta) => {
     tmp_buff.asciiWrite(zipped_encoding)
     hexed_string += tmp_buff.toString('hex')
 
-    // Fill (hashes) flag
-    hexed_string += meta.hashes_length != null ? '01' : '00'
-
-    // Fill (hashes length), only if available
-    if (meta.hashes_length) {
-        hexed_string += Translate(meta.hashes_length)
-    }
-
     // Fill iv
     if (Buffer.isBuffer(meta.iv)) {
         hexed_string += meta.iv.toString('hex')
@@ -100,21 +92,13 @@ const CreateData = (meta) => {
     } else { hexed_string += '00' }
 
     // Fill Actual encrypted content
-    if (meta.hashes) {
-        hexed_string += MakeBuffer(meta.hashes, meta.encoding, true).toString('hex')
-    } else {
-        hexed_string += MakeBuffer(meta.hash, meta.encoding).toString('hex')
-    }
+    hexed_string += MakeBuffer(meta.hash, meta.encoding).toString('hex')
 
     // Fill tag details
-    if (meta.tag) {
-        if (Buffer.isBuffer(meta.tag)) {
-            hexed_string += meta.tag.toString('hex')
-        } else {
-            hexed_string += meta.tag
-        }
+    if (Buffer.isBuffer(meta.tag)) {
+        hexed_string += meta.tag.toString('hex')
     } else {
-        hexed_string += MakeBuffer(meta.tags, 'hex', true).toString('hex')
+        hexed_string += meta.tag
     }
 
     // Fill in file extention tag
@@ -133,19 +117,18 @@ const GetMeta = (buff) => {
     let version = buff[0]
     let keylength = buff[1] + 1
     let encoding = ExpandEncoding(buff.slice(2, 5).toString('utf8'))
-    let flag = buff[5]
-    let hashes_length = flag ? buff.slice(7, 9) : null
-    let iv = flag ? buff.slice(9, 26) : buff.slice(6, 22)
-    let isJSON = buff[22]
+    let iv = buff.slice(5, 21)
+    let isJSON = buff[21]
 
     // The tag is a full 32 char hex in 'cbc' mode
     // and a shorter 16 char hex in 'gcm' mode
     let tag_type = version == 1 ? 'extended' : 'compressed'
-    let tag_start = tag_type == 'extended' ? 37 : 21
+    let multiplier = tag_type == 'extended' ? 32 : 16
+    let tag_start = buff.length - (5 + multiplier)
 
-    let content = buff.slice(23, buff.length - tag_start).toString(encoding)
+    let content = buff.slice(22, tag_start).toString(encoding)
 
-    let tag = buff.slice(buff.length - tag_start, buff.length - 5) // Last 16 bytes
+    let tag = buff.slice(tag_start, buff.length - 5) // Last 16 bytes
     let ext = buff.slice(buff.length - 5)
 
     return {
@@ -153,12 +136,9 @@ const GetMeta = (buff) => {
         mode: version == 1 ? 'cbc' : 'gcm',
         keylength: keylength,
         encoding: encoding,
-        flag: flag,
-        hashes_length: hashes_length,
         iv: iv,
         isJSON: isJSON,
-        hash: hashes_length > 0 ? null : content,
-        hashes: hashes_length > 0 ? content : null,
+        hash: content,
         tag: tag,
         ext: ext
     }
