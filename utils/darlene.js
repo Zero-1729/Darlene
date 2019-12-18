@@ -272,6 +272,8 @@ const DecryptFlat = (passphrase, data) => {
 */
 
 const EncryptFileSync = (passphrase, fp, meta) => {
+    // Note: if you are trying to encrypt text file
+    // ... leave the 'ext' field as 'null' in the 'meta'
     meta.ext = fp.slice(fp.lastIndexOf('.')+1)
 
     let buff
@@ -288,7 +290,11 @@ const EncryptFileSync = (passphrase, fp, meta) => {
 
     let cipher = CreateCipher({keylength: meta.keylength, mode: meta.mode, key: key, iv: iv})
 
-    let encrypted = cipher.update(buff, 'utf8', meta.encoding)
+    // If we are encoding binary data 'non-text files' we have to specify
+    let data_format = meta.ext ? 'binary' : 'utf8'
+    
+    let encrypted = cipher.update(buff, data_format, meta.encoding)
+
     encrypted += cipher.final(meta.encoding)
 
     // Generate tag from 'passphrase', 'iv', and 'cipher text'
@@ -353,9 +359,14 @@ const DecryptFileSync = (passphrase, fp) => {
         }
 
         try {
-            let decrypted = decipher.update(content, ExpandEncoding(meta.encoding), 'utf8')
+            // Binary data isn't decoded with 'utf8'
+            let data_format = meta.ext ? ExpandEncoding(meta.encoding) : 'utf8'
+            let decrypted = decipher.update(content, ExpandEncoding(meta.encoding), data_format)
 
-            decrypted += decipher.final('utf8')
+            decrypted += decipher.final(data_format)
+
+            // Re-convert binary data to Buffer
+            decrypted = meta.ext ? Buffer.from(decrypted, ExpandEncoding(meta.encoding)) : decrypted
 
             // Writing file should be handled externally
             return {plain: decrypted, metas: meta}
@@ -368,14 +379,21 @@ const DecryptFileSync = (passphrase, fp) => {
         }
     } else {
         // GCM mode
-        let text = decipher.update(content, ExpandEncoding(meta.encoding), 'utf8')
+
+        // Binary data isn't decoded with 'utf8'
+        let data_format = meta.ext ? ExpandEncoding(meta.encoding) : 'utf8'
+        let decrypted = decipher.update(content, ExpandEncoding(meta.encoding), data_format)
 
         try {
-            text += decipher.final('utf8')
+            decrypted += decipher.final(data_format)
+
+            // Re-convert binary data to Buffer
+            decrypted = meta.ext ? Buffer.from(decrypted, ExpandEncoding(meta.encoding)) : decrypted
 
             // Writing file should be handled externally
-            return {plain: text, metas: meta}
+            return {plain: decrypted, metas: meta}
         } catch (e) {
+            console.log(e)
             throw new Error('[AuthError] Bad or Forged tag detected!')
         }
     }
