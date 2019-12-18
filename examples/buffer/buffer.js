@@ -16,6 +16,8 @@ let meta = GetMeta(blob)
 
 PrintContent(blob)
 
+// Here you can decide to convert it back to a Buffer; using `Buffer.from(data, 'hex')`
+// I chose not to because I need to print out the content
 let decrypted = DecryptFlat(readInput('Enter secret: '), meta)
 
 console.log(`\nDecrypted:\n\n'${decrypted}'`) // Returns buffer string

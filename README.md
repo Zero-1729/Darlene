@@ -10,6 +10,10 @@ This allows Darlene preserve the necessary metadata for decrypting the data late
 
 ---
 
+> **Tip**: After decrypting, remember to convert back to `Buffer`; hex/base64 string is returned. 
+> 
+> Check [the sample code](./examples/buffer/buffer.js) for more info.
+
 - Darlene can Encrypt/Decrypt:
     - [x] JSON
     - [x] String
