@@ -164,7 +164,7 @@ const EncryptFlat = (passphrase, data, meta) => {
         tag: tag,
         hash: content,
         isJSON: meta.isJSON,
-        ext: null
+        ext: meta.ext || null
     })
 }
 
