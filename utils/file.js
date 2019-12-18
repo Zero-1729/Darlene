@@ -146,7 +146,10 @@ const WriteFile = (fp, data, ext='drln') => {
         ext = getExtension(ext)
     }
 
-    let outfp = fp.includes('.') ? fp.slice(0, fp.lastIndexOf('.')) + '.' + ext : fp + '.' + ext
+    let lastDotIdx = fp.lastIndexOf('.')
+    let outfp = lastDotIdx != -1 ? 
+                fp.slice(0, lastDotIdx > 0 ? lastDotIdx : 
+                fp.length ) + '.' + ext : fp + '.' + ext
 
     fs.writeFileSync(outfp, data)
 }
