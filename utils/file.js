@@ -1,6 +1,7 @@
-const fs = require('fs')
-
 const { AbbvEnconding, ExpandEncoding, MakeBuffer } = require('./encoding')
+
+const fs   = require('fs')
+const path = require('path')
 
 
 const isEmptyBuffer = (buff) => {
@@ -69,7 +70,7 @@ const CreateData = (meta) => {
         hexed_string += meta.iv.toString('hex')
     } else {
         // Assuming it is in the form '0x...'
-        hexed_string += meta.iv.slice(2)
+        hexed_string += meta.iv.slice(0, 2) == '0x' ? meta.iv.slice(2) : meta.iv
     }
 
     // Add 'isJSON' flag
@@ -140,18 +141,20 @@ const ReadFile = (fp, print=true) => {
     return content
 }
 
-const WriteFile = (fp, data, ext='drln') => {
+const WriteFile = (fp, data, ext='.drln') => {
     if (Buffer.isBuffer(ext)) {
         // Only attempt to sanitize if buffer
         ext = getExtension(ext)
     }
 
     let lastDotIdx = fp.lastIndexOf('.')
-    let outfp = lastDotIdx != -1 ? 
-                fp.slice(0, lastDotIdx > 0 ? lastDotIdx : 
-                fp.length ) + '.' + ext : fp + '.' + ext
+    let outfp = path.extname(fp) ? 
+                fp.slice(0, lastDotIdx) + ext : fp + ext
 
     fs.writeFileSync(outfp, data)
+
+    // So we can know the final file path written to
+    return outfp
 }
 
 module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent }

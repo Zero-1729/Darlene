@@ -33,7 +33,7 @@ const CreateKey = (passphrase, key_length=24) => {
     try {
         return crypto.scryptSync(passphrase, 'salt', key_length)
     } catch (e) {
-        throw new Error("[KeyLengthError] Key length out of valid range")
+        throw "[KeylengthError] Key length out of valid range"
     }
 }
 
@@ -42,11 +42,25 @@ const CreateKey = (passphrase, key_length=24) => {
     Creates a cipher/decipher
 */
 const CreateCipher = (meta) => {
-    return crypto.createCipheriv(`aes-${meta.keylength}-${meta.mode}`, meta.key, meta.iv)
+    try {
+        return crypto.createCipheriv(`aes-${meta.keylength}-${meta.mode}`, meta.key, meta.iv)
+    } catch (e) {
+        let erratum = e.message.includes('Unknown cipher') ? 
+                      'check that keylength or mode is correct' : ''
+
+        throw `[DecipherError] ${e.message}: ${erratum}`
+    }
 }
 
 const CreateDecipher = (meta) => {
-    return crypto.createDecipheriv(`aes-${meta.keylength}-${meta.mode}`, meta.key, meta.iv)
+    try {
+        return crypto.createDecipheriv(`aes-${meta.keylength}-${meta.mode}`, meta.key, meta.iv)
+    } catch (e) {
+        let erratum = e.message.includes('Unknown cipher') ? 
+                      'check that keylength or mode is correct' : ''
+
+        throw `[DecipherError] ${e.message}: ${erratum}`
+    }
 }
 
 
@@ -192,7 +206,7 @@ const EncryptFlat = (passphrase, data, meta) => {
 const DecryptFlat = (passphrase, data) => {
     // Scrapp darlene data
     let meta = Buffer.isBuffer(data) ? GetMeta(data) : data
-    
+
     let key = CreateKey(passphrase, meta.keylength/8)
     let iv = meta.iv
 
@@ -215,7 +229,7 @@ const DecryptFlat = (passphrase, data) => {
         // If the secret passphrase, iv or ciphertext edited
         // It will fail to encrypt
         if (meta.tag.toString('hex') != newTag) {
-            throw new Error('[TagError] Tag Mismatch, suspecting edited inputs!')
+            throw '[TagError] Tag Mismatch, suspecting edited inputs!'
         }
 
         try {
@@ -225,11 +239,9 @@ const DecryptFlat = (passphrase, data) => {
 
             return meta.isJSON ? JSON.parse(decrypted) : decrypted
         } catch (e) {
-            if (e.message.includes('error:06065064')) {
-                throw new Error("[KeyLengthError] CBC Key Length provided is invalid")
-            } else {
-                throw new Error("[EncodingError] Provided wrong encoding for cipher text")
-            }
+            let message = e.message.includes('error:0606506D') ? 'Cannot change encoding or cipher text' : e.message
+            
+            throw `[EncodingError] ${message}`
         }
     } else {
         // GCM mode
@@ -240,7 +252,7 @@ const DecryptFlat = (passphrase, data) => {
 
             return meta.isJSON ? JSON.parse(text) : text
         } catch (e) {
-            throw new Error('[AuthError] Bad or Forged tag detected!')
+            throw '[AuthError] Bad or Forged tag detected!'
         }
     }
 }
@@ -281,7 +293,7 @@ const EncryptFileSync = (passphrase, fp, meta) => {
     try {
         buff = fs.readFileSync(fp)
     } catch (e) {
-        throw new Error(`[Couldn't read file '${fp}': ${e.message}`)
+        throw `[Couldn't read file '${fp}': ${e.message}`
     }
 
     // create cipher
@@ -355,7 +367,7 @@ const DecryptFileSync = (passphrase, fp) => {
         // If the secret passphrase, iv or ciphertext edited
         // It will fail to encrypt
         if (meta.tag.toString('hex') != newTag) {
-            throw new Error('[TagError] Tag Mismatch, suspecting edited inputs!')
+            throw '[TagError] Tag Mismatch, suspecting edited inputs!'
         }
 
         try {
@@ -371,11 +383,9 @@ const DecryptFileSync = (passphrase, fp) => {
             // Writing file should be handled externally
             return {plain: decrypted, metas: meta}
         } catch (e) {
-            if (e.message.includes('error:06065064')) {
-                throw new Error("[KeyLengthError] CBC Key Length provided is invalid")
-            } else {
-                throw new Error("[EncodingError] Provided wrong encoding for cipher text")
-            }
+            let message = e.message.includes('error:0606506D') ? 'Cannot change encoding or cipher text' : e.message
+
+            throw `[EncodingError] ${message}`
         }
     } else {
         // GCM mode
@@ -394,7 +404,7 @@ const DecryptFileSync = (passphrase, fp) => {
             return {plain: decrypted, metas: meta}
         } catch (e) {
             console.log(e)
-            throw new Error('[AuthError] Bad or Forged tag detected!')
+            throw '[AuthError] Bad or Forged tag detected!'
         }
     }
 }

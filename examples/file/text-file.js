@@ -1,12 +1,12 @@
 const { PrintContent } = require('../../utils/file')
 const { GetMeta, WriteFile } = require('../../utils/file')
 const { EncryptFileSync, DecryptFileSync } = require('../../utils/darlene')
-const { readInput } = require('../../utils/psswd')
+const { ReadInput } = require('../../utils/psswd')
 
 const path = require('path')
 
 
-let psswd = readInput('Enter secret: ')
+let psswd = ReadInput('Enter secret: ')
 
 const fp = path.join('data', 'samples', 'message.txt') // Test file path
 const efp = path.join('data', 'message.drln')

@@ -1,11 +1,11 @@
 const { WriteFile } = require('../../utils/file')
 const { EncryptFileSync, DecryptFileSync } = require('../../utils/darlene')
-const { readInput } = require('../../utils/psswd')
+const { ReadInput } = require('../../utils/psswd')
 
 const path = require('path')
 
 
-let psswd = readInput('Enter secret: ')
+let psswd = ReadInput('Enter secret: ')
 
 const fp = path.join('data', 'samples', 'image.jpeg') // Test file path
 const efp = path.join('data', 'image.drln')
@@ -22,6 +22,6 @@ const buff = EncryptFileSync(psswd, fp, meta)
 
 WriteFile(efp, buff)
 
-let out = DecryptFileSync(readInput('Enter secret again: '), efp)
+let out = DecryptFileSync(ReadInput('Enter secret again: '), efp)
 
 WriteFile(efp, out.plain, out.metas.ext)

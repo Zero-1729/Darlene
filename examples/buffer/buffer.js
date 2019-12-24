@@ -1,6 +1,6 @@
 const { EncryptFlat, DecryptFlat } = require('../../utils/darlene')
 const { PrintContent, GetMeta } = require('../../utils/file')
-const { readInput } = require('../../utils/psswd')
+const { ReadInput } = require('../../utils/psswd')
 
 let secret = 'thisisnotsecure'
 let digit = Buffer.from('06c1') // Secret number: 1729 (hex)

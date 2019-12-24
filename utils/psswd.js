@@ -17,7 +17,7 @@ const printPrompt = (prompt, str, insert, hidden=true) => {
 }
 
 // Synchronous fn
-const readInput = (prompt, hidden=true) => {
+const ReadInput = (prompt, hidden=true) => {
     let fd
     let insert = 0 // For arrows, to control cursor pos
 
@@ -119,4 +119,4 @@ const readInput = (prompt, hidden=true) => {
     return str || ''
 }
 
-module.exports = { readInput }
+module.exports = { ReadInput }

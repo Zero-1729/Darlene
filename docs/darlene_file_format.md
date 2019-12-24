@@ -18,7 +18,7 @@ A darlene file is a binary file that contains the following information
 | Initialization Vector (`iv`) | Next 16 bytes | - |
 | Encrypted Content | Remaining bytes: after first 21 bytes and before last 21 - 37 bytes | Actual encrypted text.<br><br>**Note**: First byte determines whether encrypted content is a plain string or encrypted JSON. If the byte is set to  '1' (`< 01 >`) then we know it is a JSON, else if it is unset (`< 00 >`) then it is just a plain string |
 | Tag | next 16 - 32 bytes | Tag from `GCM` mode if version byte -> `< 02 >` (`v2`)<br><br>`Hmac('sha256')` for `CBC` if version byte -> `< 01 >` (`v1`)<br><br>To be used as the Checksum, for file integrity check.<br><br>**Note**: The tag is a full 32 char hex in 'cbc' mode and a shorter 16 char hex in 'gcm' mode |
-| Extension | last 5 bytes | Original file extension of encrypted file, to be used when decrypting a darlene file.<br><br>**Note**: Defaults to `< 00 00 00 00 00 >` when handling non-files. |
+| File Extension | last 5 bytes | Original file extension of encrypted file, to be used when decrypting a darlene file.<br><br>**Note**: Defaults to `< 00 00 00 00 00 >` when handling non-files. |
 
 ## AES mode info
 
