@@ -1,5 +1,5 @@
-const { readInput } = require('../../utils/psswd')
+const { ReadInput } = require('../../utils/psswd')
 
-let psswd = readInput('Passphrase: ')
+let psswd = ReadInput('Passphrase: ')
 
 console.log(`[+] recieved: '${psswd}'`)

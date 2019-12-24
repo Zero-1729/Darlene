@@ -1,6 +1,6 @@
 const { EncryptFlat, DecryptFlat } = require('../../utils/darlene')
 const { WriteFile, ReadFile } = require('../../utils/file')
-const { readInput } = require('../../utils/psswd')
+const { ReadInput } = require('../../utils/psswd')
 
 const path = require('path')
 
@@ -17,7 +17,7 @@ WriteFile(fp, EncryptFlat(secret, text, {
     isJSON: false
 }))
 
-let decrypted = DecryptFlat(readInput('Enter Passphrase: '), ReadFile(efp))
+let decrypted = DecryptFlat(ReadInput('Enter Passphrase: '), ReadFile(efp))
 
 console.log("\nDecrypted: \n")
 console.log(decrypted)

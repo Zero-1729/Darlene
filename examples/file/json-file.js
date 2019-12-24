@@ -1,6 +1,6 @@
 const { PrintContent } = require('../../utils/file')
 const { EncryptFileSync, DecryptFlat } = require('../../utils/darlene')
-const { readInput } = require('../../utils/psswd')
+const { ReadInput } = require('../../utils/psswd')
 
 const path = require('path')
 
@@ -17,7 +17,7 @@ let out = EncryptFileSync(secret, fp, {
 
 PrintContent(out)
 
-let decrypted = DecryptFlat(readInput('Enter Passphrase: '), out)
+let decrypted = DecryptFlat(ReadInput('Enter Passphrase: '), out)
 
 console.log('\nrecovered:')
 console.log(decrypted)

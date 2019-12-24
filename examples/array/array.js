@@ -16,8 +16,8 @@ let words = JSON.stringify([
 ])
 
 let blob = EncryptFlat(secret, words, {
-    mode: 'gcm',
-    keylength: 256,
+    mode: 'cbc',
+    keylength: 128,
     encoding: 'base64',
     isJSON: true
 })
