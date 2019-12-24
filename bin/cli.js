@@ -62,7 +62,11 @@ const help = () => {
         } catch (e) {
             // Print errors
             console.log(e)
-            console.log("use -h flag to print list of options and usage")
+
+            // Print additional message if cli error
+            if (e.includes('darlene')) {
+                console.log("use -h flag to print list of options and usage")
+            }
         }
     }
 })()
