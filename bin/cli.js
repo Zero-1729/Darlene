@@ -1,6 +1,10 @@
 #!/usr/local/bin/node
 
-const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
+const { buildMeta, sanitizeArgs, checkSemantics, isDarleneFile } = require('../utils/trenton')
+const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
+const { ReadFile, WriteFile, GetMeta } = require('./../utils/file')
+const { ReadInput } = require('./../utils/psswd')
+
 
 console.log('-------------')
 console.log('Darlene CLI')
@@ -59,6 +63,125 @@ const help = () => {
                 metas.ext = metas.file.slice(metas.file.lastIndexOf('.') + 1)
             } 
 
+            // Accept secret here
+            const key = ReadInput("Enter passphrase: ")
+
+            // Template meta
+            console.log('\n[*] Building meta...')
+
+            let meta = {
+                mode: metas.mode,
+                keylength: metas.keylength,
+                encoding: metas.encoding,
+                isJSON: metas.isJSON
+            }
+            
+            // Handle encryption
+            if (metas.encrypt) {
+                // hanlde raw content
+                if (metas.content) {
+                    console.log('[*] Attempting to encrypt content...')
+                    let blob = EncryptFlat(key, metas.content, meta)
+                    
+                    console.log('[*] Attempting to write encrypted content to file...')
+                    let outfp = WriteFile(metas.out, blob)
+
+                    console.log(`[+] Wrote file: '${outfp}'`)
+                } else {
+                    // handle file
+                    // Add extra fields in meta
+                    let fp = metas.file
+                    let efp = isDarleneFile(metas.out) ? metas.out : metas.out + '.drln'
+                    
+                    console.log(`[*] Checking input file content type...`)
+                    // Hadler for binary files
+                    if (metas.binary) {
+                        meta.ext = metas.ext
+                    } else {
+                        meta.ext = null
+                    }
+
+                    console.log(`[*] Encrypting file contents...`)
+                    let buff = EncryptFileSync(key, fp, meta)
+
+                    console.log(`[*] Writing encrypted content to file: '${efp}'...`)
+                    let outfp = WriteFile(efp, buff)
+
+                    console.log(`[+] Wrote file: '${outfp}'`)
+                }
+            } else {
+                // Handle decryption
+                let decrypted
+                let fp = metas.out
+
+                if (metas.content) {
+                    // Handle content decryption
+                    // Add extra fields
+                    console.log(`[*] Appending tag and iv to meta...`)
+                    meta.iv = metas.iv
+                    meta.tag = metas.tag
+                    meta.hash = metas.content
+
+                    console.log('[*] Attempting to decrypt content...')
+                    decrypted = DecryptFlat(key, meta)
+
+                    if (metas.show) {
+                        console.log('[+] Recovered:')
+                        console.log(`\n${decrypted}\n`)
+                    }
+
+                    let outfp = WriteFile(fp, decrypted, '.txt')
+                    console.log(`[+] Wrote content to file: ${outfp}`)
+                } else {
+                    // Handle (darlene) file decryption
+                    // file path
+                    let fp = metas.file
+
+                    console.log('[*] Reading encrypted content...')
+                    let blob = ReadFile(fp)
+
+                    console.log('[*] Attempting to decrypt content...')
+                    decrypted = DecryptFileSync(key, fp)
+
+                    // Extract new file content
+                    console.log('[*] Extracting encrypted file extension...')
+                    let file_info = GetMeta(blob)
+
+                    let efp
+                    let ext = meta.ext
+                    
+                    console.log('[*] Creating file path to write content...')
+                    if (file_info.ext) {
+                        // binary file
+                        efp = metas.out ? 
+                              metas.out.slice(0, metas.out.lastIndexOf('.')) : 
+                              fp.slice(0, fp.lastIndexOf('.'))
+                    } else {
+                        // text/json file
+                        if (metas.isJSON) {
+                            efp = metas.out ? 
+                                  metas.out.slice(0, metas.out.lastIndexOf('.')) : 
+                                  fp.slice(0, fp.lastIndexOf('.'))
+
+                            ext = '.json'
+                        } else {
+                            efp = metas.out ? 
+                                  metas.out.slice(0, metas.out.lastIndexOf('.')) : 
+                                  fp.slice(0, fp.lastIndexOf('.'))
+
+                            ext = '.txt'
+                        }
+                    }
+
+                    if (metas.show) {
+                        console.log('[+] Recovered:')
+                        console.log(decrypted)
+                    }
+
+                    let outfp = WriteFile(efp, decrypted, ext)
+                    console.log(`[+] Wrote content to file: '${outfp}'`)
+                }
+            }
         } catch (e) {
             // Print errors
             console.log(e)
