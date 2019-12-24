@@ -161,7 +161,11 @@ const sanitizeArgs = (args) => {
 }
 
 const isDarleneFile = (fp) => {
-    return fp.slice(fp.lastIndexOf('.')+1) == 'drln'
+    if (fp) {
+        return fp.slice(fp.lastIndexOf('.')+1) == 'drln'
+    }
+
+    return false
 }
 
 const checkSemantics = (metas) => {
