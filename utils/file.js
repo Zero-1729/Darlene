@@ -69,7 +69,7 @@ const CreateData = (meta) => {
         hexed_string += meta.iv.toString('hex')
     } else {
         // Assuming it is in the form '0x...'
-        hexed_string += meta.iv.slice(2)
+        hexed_string += meta.iv.slice(0, 2) == '0x' ? meta.iv.slice(2) : meta.iv
     }
 
     // Add 'isJSON' flag
