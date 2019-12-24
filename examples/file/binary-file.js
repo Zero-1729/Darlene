@@ -22,6 +22,6 @@ const buff = EncryptFileSync(psswd, fp, meta)
 
 WriteFile(efp, buff)
 
-let out = DecryptFileSync(readInput('Enter secret again: '), efp)
+let out = DecryptFileSync(ReadInput('Enter secret again: '), efp)
 
 WriteFile(efp, out.plain, out.metas.ext)
