@@ -1,6 +1,6 @@
 #!/usr/local/bin/node
 
-const { buildMeta, sanitizeArgs } = require('../utils/trenton')
+const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
 
 console.log('-------------')
 console.log('Darlene CLI')
@@ -43,7 +43,22 @@ const help = () => {
     } else {
         try {
             // Meta needed by Darlene
-            buildMeta(args)
+            let metas = buildMeta(args)
+
+            console.log(metas)
+
+            // Semantic pass
+            checkSemantics(metas)
+
+            // Exec pass
+            //
+            // Set ext value
+            if (metas.ext) {
+                // Remember that the 'binary' option set this to true
+                // ... now we fill it in with the actual ext value
+                metas.ext = metas.file.slice(metas.file.lastIndexOf('.') + 1)
+            } 
+
         } catch (e) {
             // Print errors
             console.log(e)

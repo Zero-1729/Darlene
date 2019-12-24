@@ -279,23 +279,9 @@ const buildMeta = (args) => {
             throw `darlene: invalid option '${stripArg(args[i])}'`
         }
     }
-
-    console.log(metas)
-
-    // Semantic pass
-    checkSemantics(metas)
-
-    // Exec pass
-    //
-    // Set ext value
-    if (metas.ext) {
-        // Remember that the 'binary' option set this to true
-        // ... now we fill it in with the actual ext value
-        metas.ext = metas.file.slice(metas.file.lastIndexOf('.') + 1)
-    }
   
     return metas
 
 }
 
-module.exports = { buildMeta, sanitizeArgs }
+module.exports = { buildMeta, sanitizeArgs, checkSemantics }
