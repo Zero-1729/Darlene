@@ -212,7 +212,7 @@ const checkSemantics = (metas) => {
     }
 
     // Check whether non darlene file provided with decrypt op
-    if ((metas.decrypt) && !isDarleneFile(metas.file)) {
+    if ((metas.decrypt) && (!isDarleneFile(metas.file) && metas.content == null)) {
         throw `darlene: can only decrypt '.drln' files and raw content (see '-c' flag usage)`
     }
 
