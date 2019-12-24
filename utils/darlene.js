@@ -33,7 +33,7 @@ const CreateKey = (passphrase, key_length=24) => {
     try {
         return crypto.scryptSync(passphrase, 'salt', key_length)
     } catch (e) {
-        throw new Error("[KeyLengthError] Key length out of valid range")
+        throw new Error("[KeylengthError] Key length out of valid range")
     }
 }
 
@@ -42,11 +42,25 @@ const CreateKey = (passphrase, key_length=24) => {
     Creates a cipher/decipher
 */
 const CreateCipher = (meta) => {
-    return crypto.createCipheriv(`aes-${meta.keylength}-${meta.mode}`, meta.key, meta.iv)
+    try {
+        return crypto.createCipheriv(`aes-${meta.keylength}-${meta.mode}`, meta.key, meta.iv)
+    } catch (e) {
+        let erratum = e.message.includes('Unknown cipher') ? 
+                      'check that keylength or mode is correct' : ''
+
+        throw new Error(`[DecipherError] ${e.message}: ${erratum}`)
+    }
 }
 
 const CreateDecipher = (meta) => {
-    return crypto.createDecipheriv(`aes-${meta.keylength}-${meta.mode}`, meta.key, meta.iv)
+    try {
+        return crypto.createDecipheriv(`aes-${meta.keylength}-${meta.mode}`, meta.key, meta.iv)
+    } catch (e) {
+        let erratum = e.message.includes('Unknown cipher') ? 
+                      'check that keylength or mode is correct' : ''
+
+        throw new Error(`[DecipherError] ${e.message}: ${erratum}`)
+    }
 }
 
 
@@ -225,11 +239,9 @@ const DecryptFlat = (passphrase, data) => {
 
             return meta.isJSON ? JSON.parse(decrypted) : decrypted
         } catch (e) {
-            if (e.message.includes('error:06065064')) {
-                throw new Error("[KeyLengthError] CBC Key Length provided is invalid")
-            } else {
-                throw new Error("[EncodingError] Provided wrong encoding for cipher text")
-            }
+            let message = e.message.includes('error:0606506D') ? 'Cannot change encoding or cipher text' : e.message
+            
+            throw new Error(`[EncodingError] ${message}`)
         }
     } else {
         // GCM mode
@@ -371,11 +383,9 @@ const DecryptFileSync = (passphrase, fp) => {
             // Writing file should be handled externally
             return {plain: decrypted, metas: meta}
         } catch (e) {
-            if (e.message.includes('error:06065064')) {
-                throw new Error("[KeyLengthError] CBC Key Length provided is invalid")
-            } else {
-                throw new Error("[EncodingError] Provided wrong encoding for cipher text")
-            }
+            let message = e.message.includes('error:0606506D') ? 'Cannot change encoding or cipher text' : e.message
+
+            throw new Error(`[EncodingError] ${message}`)
         }
     } else {
         // GCM mode
