@@ -168,6 +168,16 @@ const isDarleneFile = (fp) => {
     return false
 }
 
+const isNumber = (str) => {
+    let retval = false
+
+    if (str.match(/[0-9]+/)) {
+        retval = str.match(/[0-9]+/).index == 0 ? true : false
+    }
+
+    return retval
+}
+
 const checkSemantics = (metas) => {
     // Check whether neither 'encrypt' or 'decrypt' specified
     if (!metas.encrypt && !metas.decrypt) {
@@ -263,7 +273,7 @@ const buildMeta = (args) => {
                 } else {
                     // Other metas are updating by direct indexing
                     // ... since the 'arg' is expanded and matches the keys
-                    metas[obj.arg] = obj.value
+                    metas[obj.arg] = isNumber(String(obj.value)) ? Number(obj.value) : obj.value
                 }
     
                 // Instead of a single increment
@@ -284,4 +294,4 @@ const buildMeta = (args) => {
 
 }
 
-module.exports = { buildMeta, sanitizeArgs, checkSemantics }
+module.exports = { buildMeta, sanitizeArgs, checkSemantics, isDarleneFile }
