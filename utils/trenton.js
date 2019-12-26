@@ -2,8 +2,7 @@
 * Trenton: A small hacky commandline wrangler
 */
 
-const path = require('path')
-
+const { isDarleneFile, isValidPath } = require('./file')
 
 // Easily translate some options to metas key
 const meta_aliases = {
@@ -160,14 +159,6 @@ const sanitizeArgs = (args) => {
     return newArgs
 }
 
-const isDarleneFile = (fp) => {
-    if (fp) {
-        return fp.slice(fp.lastIndexOf('.')+1) == 'drln'
-    }
-
-    return false
-}
-
 const isNumber = (str) => {
     let retval = false
 
@@ -294,4 +285,4 @@ const buildMeta = (args) => {
 
 }
 
-module.exports = { buildMeta, sanitizeArgs, checkSemantics, isDarleneFile }
+module.exports = { buildMeta, sanitizeArgs, checkSemantics }

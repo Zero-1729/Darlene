@@ -16,14 +16,52 @@ const keylengths = {
     256: 'ff'
 }
 
-const getExtension = (ext) => {
-    if (!Buffer.isBuffer(ext)) {
-        return ext
-    }
-
+const GetExt = (buff) => {
+    // returns a file extension without the unicode escape code
     // Remember the 'ext' buffer carries zeros when not filled
     // So we have to remove all zero bytes
-    return ext.asciiSlice().replace(new RegExp('\u0000', 'g'), '')
+    return Buffer.isBuffer(buff) ? 
+           // Returns extracted ext
+           buff.toString().replace(new RegExp('\u0000[0000]*', 'g'), '') : 
+           // Strips all dots from ext
+           buff.replace(/\.*/, '')
+}
+
+const SplitFP = (fp) => {
+    // returns the file path and extension
+    if (path.extname(fp).length > 0) {
+        // Returns the file path stripped of its ext alongside the ext
+        return {fp: fp.slice(0, fp.lastIndexOf('.')), ext: path.extname(fp).slice(1)}
+    }
+
+    return {fp: fp, ext: 'txt'}
+}
+
+const isValidPath = (fp) => {
+    if (fp == null) {
+        return false
+    } else {
+        return path.basename(fp) == '.'
+    }
+}
+
+const StripMerge = (fp, ext) => {
+    // returns properly joined text
+    if (path.extname(fp).length > 0) {
+        return fp.replace(/\.[a-zA-Z]+$/, '.' + GetExt(ext))
+    }
+
+    // No extension file name
+    return  fp + '.' + GetExt(ext)
+}
+
+
+const isDarleneFile = (fp) => {
+    if (fp) {
+        return fp.slice(fp.lastIndexOf('.')+1) == 'drln'
+    }
+
+    return false
 }
 
 const PrintContent = (data) => {
@@ -47,7 +85,6 @@ const PrintContent = (data) => {
         console.log(data)
     }
 }
-
 
 const CreateData = (meta) => {
     let hexed_string = ''
@@ -157,4 +194,4 @@ const WriteFile = (fp, data, ext='.drln') => {
     return outfp
 }
 
-module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent }
+module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, SplitFP, StripMerge }
