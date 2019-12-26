@@ -23,7 +23,7 @@ This allows Darlene preserve the necessary metadata for decrypting the data late
 
 ---
 
-# Install
+# Install CLI
 
 ## Node repo
 
