@@ -16,9 +16,9 @@ A darlene file is a binary file that contains the following information
 | (AES) Key Length | Second byte | To allow any file parser easily make out the key size for creating the key.<br><br>Value of `< 7f >` (`128`), `< bf >` (`192`), or `< ff >` (`256`). |
 | Encoding | Next 3 bytes | Hash encoding.<br><br>**Note**: Hex -> `< 68 65 78 >` (utf8 string '`hex`') & Base64 -> `< 62 36 34 >` (utf8 string `b64`) |
 | Initialization Vector (`iv`) | Next 16 bytes | - |
-| Encrypted Content | Remaining bytes: after first 21 bytes and before last 21 - 37 bytes | Actual encrypted text.<br><br>**Note**: First byte determines whether encrypted content is a plain string or encrypted JSON. If the byte is set to  '1' (`< 01 >`) then we know it is a JSON, else if it is unset (`< 00 >`) then it is just a plain string |
+| Encrypted Content | Remaining bytes: after first 21 bytes and before last 21 - 37 bytes | Actual encrypted text.<br><br>**Note**: First byte determines the encrypted content type: binary, JSON or plain text.<br><br>If the content is binary the value is set to `< 02 >`, `< 01 >` if its JSON and left empty (`< 00 >` if its plain text. |
 | Tag | next 16 - 32 bytes | Tag from `GCM` mode if version byte -> `< 02 >` (`v2`)<br><br>`Hmac('sha256')` for `CBC` if version byte -> `< 01 >` (`v1`)<br><br>To be used as the Checksum, for file integrity check.<br><br>**Note**: The tag is a full 32 char hex in 'cbc' mode and a shorter 16 char hex in 'gcm' mode |
-| File Extension | last 5 bytes | Original file extension of encrypted file, to be used when decrypting a darlene file.<br><br>**Note**: Defaults to `< 00 00 00 00 00 >` when handling non-files. |
+| File Extension | last 5 bytes | Original file extension of encrypted file, to be used when decrypting a darlene file.<br><br>To save space, the extension is stored without the prepended dot. I.e. `png` not `.png`.<br><br>**Note**: Defaults to `< 74 78 74 00 00 >` (`txt`). |
 
 ## AES mode info
 
