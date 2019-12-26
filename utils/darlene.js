@@ -1,9 +1,9 @@
-const fs = require('fs')
-
-const crypto = require('crypto')
 const { HexToBuffer } = require('./hex')
 const { CreateData, GetMeta, ReadFile } = require('./file')
 const { AbbvEnconding, ExpandEncoding } = require('./encoding')
+
+const fs = require('fs')
+const crypto = require('crypto')
 
 /*
 * Uses AES CBC/GCM Symmetric Cipher To Encrypt/Decrypt inputs
@@ -170,6 +170,14 @@ const EncryptFlat = (passphrase, data, meta) => {
     // Generate tag from 'passphrase', 'iv', and 'cipher text'
     let tag = meta.mode == 'gcm' ? cipher.getAuthTag() : GetAuthTag(passphrase, iv, content)
 
+    // Determine ext
+    if (meta.ext) {
+        meta.ext[0] == '.' ? meta.ext.slice(1) : meta.ext
+    } else {
+        // Default is text file
+        meta.ext = 'txt'
+    }
+
     return CreateData({
         mode: meta.mode,
         iv: iv,
@@ -179,6 +187,7 @@ const EncryptFlat = (passphrase, data, meta) => {
         hash: content,
         isJSON: meta.isJSON,
         ext: meta.ext || null
+        ext: meta.ext
     })
 }
 
@@ -284,16 +293,12 @@ const DecryptFlat = (passphrase, data) => {
 */
 
 const EncryptFileSync = (passphrase, fp, meta) => {
-    // Note: if you are trying to encrypt text file
-    // ... leave the 'ext' field as 'null' in the 'meta'
-    meta.ext = fp.slice(fp.lastIndexOf('.')+1)
-
     let buff
 
     try {
         buff = fs.readFileSync(fp)
     } catch (e) {
-        throw `[Couldn't read file '${fp}': ${e.message}`
+        throw `[FileError] ${e.message.split(':')[1]}`
     }
 
     // create cipher
@@ -315,7 +320,14 @@ const EncryptFileSync = (passphrase, fp, meta) => {
     meta.hash = encrypted
     meta.iv = iv
     meta.tag = tag
-    meta.ext = meta.ext || null
+
+    // Determine ext
+    if (meta.ext) {
+        meta.ext[0] == '.' ? meta.ext.slice(1) : meta.ext
+    } else {
+        // Default is text file
+        meta.ext = 'txt'
+    }
 
     return CreateData(meta)
 }

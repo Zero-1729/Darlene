@@ -169,24 +169,24 @@ const GetMeta = (buff) => {
 }
 
 const ReadFile = (fp, print=true) => {
-    let content = fs.readFileSync(fp)
+    try {
+        let content = fs.readFileSync(fp)
 
-    if (!print) {
-        printContent(content)
+        if (!print) {
+            printContent(content)
+        }
+
+        return content
+    } catch (e) {
+        // File does not exist
+        throw `[FileError] ${e.message.split(':')[1]}`
     }
-
-    return content
 }
 
-const WriteFile = (fp, data, ext='.drln') => {
-    if (Buffer.isBuffer(ext)) {
-        // Only attempt to sanitize if buffer
-        ext = getExtension(ext)
-    }
-
-    let lastDotIdx = fp.lastIndexOf('.')
-    let outfp = path.extname(fp) ? 
-                fp.slice(0, lastDotIdx) + ext : fp + ext
+const WriteFile = (fp, data, ext='drln') => {
+    // NOTE: Remember the 'ext' overrides whatever ext 'fp' carries
+    // Sanitized output: properly joined fp and ext
+    let outfp = StripMerge(fp, ext)
 
     fs.writeFileSync(outfp, data)
 
