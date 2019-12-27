@@ -121,30 +121,30 @@ const GetAuthTag = (passphrase, iv, cryptedText) => {
 }
 
 
-/* String, JSON & Buffer (D)Encryption */
+/* String, JSON & Buffer Encryption/Decryption */
 
 /*
 *  Encrypts data (string/JSON/Buffer) using using key created from passphrase.
-*  Outputs an object containing;
-*                   the Initialization Vector(iv)
-*                   and encrypted data (hash)
+*  Outputs darlene data
 *
 *  Inputs:
 *
 *  passphrase -> (String)
 *  buff -> (String | Buffer | JSON)
+*  meta -> [object] metadata for darlene
 *
 *  Output:
 *
 *  [object]:
 *               iv -> Initialization Vector <Buffer>
 *               hash -> (String)
-*               keylength -> <String>; defaults to '128'
+*               keylength -> <Number>
 *               tag -> Auth Tag
 *               encoding -> text encoding; defaults to 'hex'
 *               mode -> AES mode; defaults to gcm
 *               isJSON -> whether encrypted data is JSON
 *               isBinary -> whether encrypted data is binary content
+*               ext -> file extension. Defaults to 'txt'
 *
 */
 
@@ -195,21 +195,18 @@ const EncryptFlat = (passphrase, data, meta) => {
 
 /*
 *
-*  Decrypts data ('hash') using using key created from passphrase.
-*  Outputs an object containing;
-*                   the Initialization Vector(iv)
-*                   and decrypted data (text)
+*  Decrypts data using using key created from passphrase.
+*  Outputs decrypted buffer or text
 *
 *  Inputs:
 *
-*  passphrase   -> (String)
-*  hash         -> (String | Buffer)
-*  iv           -> Initialization Vector
+*  passphrase                    -> (String)
+*  darlene data | darlene meta   -> (Buffer) | (Object)
 *
 *  Output:
 *
 *  [object]:
-*               text  -> (String)
+*               decrypted data  -> (String) | (Buffer) if binary data
 *
 */
 
@@ -269,15 +266,13 @@ const DecryptFlat = (passphrase, data) => {
 
 /*
 *  Encrypts a file using using key created from passphrase.
-*  Outputs an object containing;
-*                   the Initialization Vector(iv)
-*                   and encrypted data (hash)
+*  Outputs darlene data (buffer)
 *
 *  Inputs:
 *
 *  passphrase -> (String)
 *  path -> string
-*  meta -> [object]; encoding, iv, mode, isJOSN, keylength
+*  meta -> [object]; encoding, iv, mode, isJOSN, isBinary, keylength
 *
 *  Output:
 *
@@ -337,21 +332,18 @@ const EncryptFileSync = (passphrase, fp, meta) => {
 
 /*
 *
-*  Decrypts data ('hash') using using key created from passphrase.
-*  Outputs an object containing;
-*                   the Initialization Vector(iv)
-*                   and decrypted data (text)
+*  Decrypts darlene data using using key created from passphrase.
+*  Outputs an object containing decrypted data (text | buffer)
 *
 *  Inputs:
 *
 *  passphrase   -> (String)
-*  hash         -> (String | Buffer)
-*  iv           -> Initialization Vector
+*  fp           -> (String) Darlene file
 *
 *  Output:
 *
 *  [object]:
-*               text  -> (String)
+*               text  -> (String) | (Buffer) if content is binary
 *
 */
 
