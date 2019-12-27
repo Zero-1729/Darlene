@@ -16,6 +16,8 @@ const meta = {
     mode: 'cbc',
     encoding: 'hex',
     isJSON: false,
+    isBinary: false,
+    ext: null
 }
 
 const buff = EncryptFileSync(psswd, fp, meta)
@@ -26,9 +28,9 @@ PrintContent(data)
 
 WriteFile(efp, buff)
 
-let out = DecryptFileSync(readInput('Enter secret again: '), efp)
+let out = DecryptFileSync(ReadInput('Enter secret again: '), efp)
 
 console.log('\nDecrypted: \n')
-console.log(out.plain)
+console.log(out.plain.toString())
 
 WriteFile(efp, out.plain, out.metas.ext)

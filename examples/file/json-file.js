@@ -12,7 +12,8 @@ let out = EncryptFileSync(secret, fp, {
     mode: 'gcm',
     keylength: 256,
     encoding: 'hex',
-    isJSON: true
+    isJSON: true,
+    isBinary: false
 })
 
 PrintContent(out)
@@ -20,4 +21,4 @@ PrintContent(out)
 let decrypted = DecryptFlat(ReadInput('Enter Passphrase: '), out)
 
 console.log('\nrecovered:')
-console.log(decrypted)
+console.log('\n', decrypted)

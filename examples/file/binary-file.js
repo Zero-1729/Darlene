@@ -7,15 +7,16 @@ const path = require('path')
 
 let psswd = ReadInput('Enter secret: ')
 
-const fp = path.join('data', 'samples', 'image.jpeg') // Test file path
-const efp = path.join('data', 'image.drln')
+const fp = path.join('data', 'samples', 'darlene.jpg') // Test file path
+const efp = path.join('data', 'darlene.drln')
 
 const meta = {
     keylength: 256,
     mode: 'gcm',
     encoding: 'base64',
     isJSON: false,
-    ext: 'jpeg' // only set to null for text files
+    isBinary: true, // indicates whether content is binary file
+    ext: 'jpeg'
 }
 
 const buff = EncryptFileSync(psswd, fp, meta)
@@ -24,4 +25,5 @@ WriteFile(efp, buff)
 
 let out = DecryptFileSync(ReadInput('Enter secret again: '), efp)
 
+// Remember the extension isn't stored with the prepended dot ('.')
 WriteFile(efp, out.plain, out.metas.ext)
