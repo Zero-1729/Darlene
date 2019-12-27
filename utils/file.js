@@ -74,7 +74,8 @@ const PrintContent = (data) => {
         console.log("mode: ", info.version == 1 ? "cbc" : "gcm")
         console.log("key length: ", info.keylength)
         console.log("encoding: ", info.encoding)
-        console.log("\nJSON: ", !info.isJSON.toString())
+        console.log("\nBinary: ", info.isBinary)
+        console.log("\nJSON: ", !info.isJSON)
         console.log("\niv (hex): ", info.iv.toString('hex'))
 
         console.log("\ntag (hex): ", info.tag.toString('hex'))
@@ -110,10 +111,15 @@ const CreateData = (meta) => {
         hexed_string += meta.iv.slice(0, 2) == '0x' ? meta.iv.slice(2) : meta.iv
     }
 
-    // Add 'isJSON' flag
-    if (meta.isJSON) {
+    // Add content type flag
+    if (meta.isBinary) {
+        hexed_string += '02'
+    } else if (meta.isJSON) {
         hexed_string += '01'
-    } else { hexed_string += '00' }
+    } else {
+        // Plain text 
+        hexed_string += '00'
+    }
 
     // Fill Actual encrypted content
     hexed_string += MakeBuffer(meta.hash, meta.encoding).toString('hex')
@@ -142,7 +148,7 @@ const GetMeta = (buff) => {
     let keylength = buff[1] + 1
     let encoding = ExpandEncoding(buff.slice(2, 5).toString('utf8'))
     let iv = buff.slice(5, 21)
-    let isJSON = buff[21]
+    let contentFlag = buff[21] //isJSON = buff[21]
 
     // The tag is a full 32 char hex in 'cbc' mode
     // and a shorter 16 char hex in 'gcm' mode
@@ -161,7 +167,8 @@ const GetMeta = (buff) => {
         keylength: keylength,
         encoding: encoding,
         iv: iv,
-        isJSON: isJSON,
+        isBinary: contentFlag == 2,
+        isJSON: contentFlag == 1,
         hash: content,
         tag: tag,
         ext: ext

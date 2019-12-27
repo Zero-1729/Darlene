@@ -143,7 +143,8 @@ const GetAuthTag = (passphrase, iv, cryptedText) => {
 *               tag -> Auth Tag
 *               encoding -> text encoding; defaults to 'hex'
 *               mode -> AES mode; defaults to gcm
-*               isJSON -> whether encrypted data s JSON
+*               isJSON -> whether encrypted data is JSON
+*               isBinary -> whether encrypted data is binary content
 *
 */
 
@@ -186,7 +187,7 @@ const EncryptFlat = (passphrase, data, meta) => {
         tag: tag,
         hash: content,
         isJSON: meta.isJSON,
-        ext: meta.ext || null
+        isBinary: meta.isBinary,
         ext: meta.ext
     })
 }
@@ -288,6 +289,7 @@ const DecryptFlat = (passphrase, data) => {
 *               encoding -> text encoding; defaults to 'hex'
 *               mode -> AES mode; defaults to gcm
 *               isJSON -> whether encrypted data is JSON (auto false)
+*               isBinary -> whether encrypted data is binary content
 *               ext -> file extention
 *
 */
@@ -308,7 +310,7 @@ const EncryptFileSync = (passphrase, fp, meta) => {
     let cipher = CreateCipher({keylength: meta.keylength, mode: meta.mode, key: key, iv: iv})
 
     // If we are encoding binary data 'non-text files' we have to specify
-    let data_format = meta.ext ? 'binary' : 'utf8'
+    let data_format = meta.isBinary ? 'binary' : 'utf8'
     
     let encrypted = cipher.update(buff, data_format, meta.encoding)
 
@@ -384,13 +386,13 @@ const DecryptFileSync = (passphrase, fp) => {
 
         try {
             // Binary data isn't decoded with 'utf8'
-            let data_format = meta.ext ? ExpandEncoding(meta.encoding) : 'utf8'
+            let data_format = meta.isBinary ? ExpandEncoding(meta.encoding) : 'utf8'
             let decrypted = decipher.update(content, ExpandEncoding(meta.encoding), data_format)
 
             decrypted += decipher.final(data_format)
 
             // Re-convert binary data to Buffer
-            decrypted = meta.ext ? Buffer.from(decrypted, ExpandEncoding(meta.encoding)) : decrypted
+            decrypted = meta.isBinary ? Buffer.from(decrypted, ExpandEncoding(meta.encoding)) : decrypted
 
             // Writing file should be handled externally
             return {plain: decrypted, metas: meta}
@@ -403,14 +405,14 @@ const DecryptFileSync = (passphrase, fp) => {
         // GCM mode
 
         // Binary data isn't decoded with 'utf8'
-        let data_format = meta.ext ? ExpandEncoding(meta.encoding) : 'utf8'
+        let data_format = meta.isBinary ? ExpandEncoding(meta.encoding) : 'utf8'
         let decrypted = decipher.update(content, ExpandEncoding(meta.encoding), data_format)
 
         try {
             decrypted += decipher.final(data_format)
 
             // Re-convert binary data to Buffer
-            decrypted = meta.ext ? Buffer.from(decrypted, ExpandEncoding(meta.encoding)) : decrypted
+            decrypted = meta.isBinary ? Buffer.from(decrypted, ExpandEncoding(meta.encoding)) : decrypted
 
             // Writing file should be handled externally
             return {plain: decrypted, metas: meta}
