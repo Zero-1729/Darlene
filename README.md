@@ -2,6 +2,8 @@
 
 A Symmetric Encryption Toolchain.
 
+![darlene](./darlene.png)
+
 ---
 
 **Note**: When Darlene encrypts some piece of data, be it a text/binary file, array, string/JSON or Buffer, it outputs a [darlene](./docs/darlene_file_format.md) file. 
