@@ -1,6 +1,6 @@
 # Darlene
 
-A Symmetric Encryption Toolchain.
+A Symmetric Encryption Tool.
 
 ---
 
