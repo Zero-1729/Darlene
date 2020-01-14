@@ -6,7 +6,7 @@ const fs = require('fs')
 const crypto = require('crypto')
 
 /*
-* Uses AES CBC/GCM Symmetric Cipher To Encrypt/Decrypt inputs
+* Uses AES CBC/GCM Cipher To Encrypt/Decrypt inputs
 */
 
 /*
