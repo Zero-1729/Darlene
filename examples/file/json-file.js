@@ -13,7 +13,8 @@ let out = EncryptFileSync(secret, fp, {
     keylength: 256,
     encoding: 'hex',
     isJSON: true,
-    isBinary: false
+    isBinary: false,
+    ext: 'json'
 })
 
 PrintContent(out)
