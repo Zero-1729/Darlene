@@ -20,8 +20,7 @@ let blob = EncryptFlat(secret, words, {
     keylength: 128,
     encoding: 'base64',
     isJSON: true,
-    isBinary: false,
-    ext: null
+    isBinary: false
 })
 
 PrintContent(blob)

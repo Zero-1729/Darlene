@@ -16,8 +16,7 @@ const meta = {
     mode: 'cbc',
     encoding: 'hex',
     isJSON: false,
-    isBinary: false,
-    ext: null
+    isBinary: false
 }
 
 const buff = EncryptFileSync(psswd, fp, meta)
