@@ -16,7 +16,7 @@ const meta = {
     encoding: 'base64',
     isJSON: false,
     isBinary: true, // indicates whether content is binary file
-    ext: 'jpeg'
+    ext: 'jpg'
 }
 
 const buff = EncryptFileSync(psswd, fp, meta)
