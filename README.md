@@ -74,4 +74,4 @@ sudo npm install -g . --unsafe-perm=true --allow-root
 
 ---
 
-MIT &copy; 2019 (Zero1729)
+MIT &copy; 2019 (Zero-1729)
