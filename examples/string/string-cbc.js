@@ -9,7 +9,8 @@ let blob = EncryptFlat(secret, text, {
     mode: 'cbc',
     keylength: 256,
     encoding: 'hex',
-    isJSON: false
+    isJSON: false,
+    isBinary: false
 })
 
 let meta = GetMeta(blob)

@@ -16,14 +16,52 @@ const keylengths = {
     256: 'ff'
 }
 
-const getExtension = (ext) => {
-    if (!Buffer.isBuffer(ext)) {
-        return ext
-    }
-
+const GetExt = (buff) => {
+    // returns a file extension without the unicode escape code
     // Remember the 'ext' buffer carries zeros when not filled
     // So we have to remove all zero bytes
-    return ext.asciiSlice().replace(new RegExp('\u0000', 'g'), '')
+    return Buffer.isBuffer(buff) ? 
+           // Returns extracted ext
+           buff.toString().replace(new RegExp('\u0000[0000]*', 'g'), '') : 
+           // Strips all dots from ext
+           buff.replace(/\.*/, '')
+}
+
+const SplitFP = (fp) => {
+    // returns the file path and extension
+    if (path.extname(fp).length > 0) {
+        // Returns the file path stripped of its ext alongside the ext
+        return {fp: fp.slice(0, fp.lastIndexOf('.')), ext: path.extname(fp).slice(1)}
+    }
+
+    return {fp: fp, ext: 'txt'}
+}
+
+const isValidPath = (fp) => {
+    if (fp == null) {
+        return false
+    } else {
+        return path.basename(fp) == '.'
+    }
+}
+
+const StripMerge = (fp, ext) => {
+    // returns properly joined text
+    if (path.extname(fp).length > 0) {
+        return fp.replace(/\.[a-zA-Z]+$/, '.' + GetExt(ext))
+    }
+
+    // No extension file name
+    return  fp + '.' + GetExt(ext)
+}
+
+
+const isDarleneFile = (fp) => {
+    if (fp) {
+        return fp.slice(fp.lastIndexOf('.')+1) == 'drln'
+    }
+
+    return false
 }
 
 const PrintContent = (data) => {
@@ -36,7 +74,8 @@ const PrintContent = (data) => {
         console.log("mode: ", info.version == 1 ? "cbc" : "gcm")
         console.log("key length: ", info.keylength)
         console.log("encoding: ", info.encoding)
-        console.log("\nJSON: ", !info.isJSON.toString())
+        console.log("\nBinary: ", info.isBinary)
+        console.log("\nJSON: ", !info.isJSON)
         console.log("\niv (hex): ", info.iv.toString('hex'))
 
         console.log("\ntag (hex): ", info.tag.toString('hex'))
@@ -47,7 +86,6 @@ const PrintContent = (data) => {
         console.log(data)
     }
 }
-
 
 const CreateData = (meta) => {
     let hexed_string = ''
@@ -73,10 +111,15 @@ const CreateData = (meta) => {
         hexed_string += meta.iv.slice(0, 2) == '0x' ? meta.iv.slice(2) : meta.iv
     }
 
-    // Add 'isJSON' flag
-    if (meta.isJSON) {
+    // Add content type flag
+    if (meta.isBinary) {
+        hexed_string += '02'
+    } else if (meta.isJSON) {
         hexed_string += '01'
-    } else { hexed_string += '00' }
+    } else {
+        // Plain text 
+        hexed_string += '00'
+    }
 
     // Fill Actual encrypted content
     hexed_string += MakeBuffer(meta.hash, meta.encoding).toString('hex')
@@ -105,7 +148,7 @@ const GetMeta = (buff) => {
     let keylength = buff[1] + 1
     let encoding = ExpandEncoding(buff.slice(2, 5).toString('utf8'))
     let iv = buff.slice(5, 21)
-    let isJSON = buff[21]
+    let contentFlag = buff[21] //isJSON = buff[21]
 
     // The tag is a full 32 char hex in 'cbc' mode
     // and a shorter 16 char hex in 'gcm' mode
@@ -124,7 +167,8 @@ const GetMeta = (buff) => {
         keylength: keylength,
         encoding: encoding,
         iv: iv,
-        isJSON: isJSON,
+        isBinary: contentFlag == 2,
+        isJSON: contentFlag == 1,
         hash: content,
         tag: tag,
         ext: ext
@@ -132,24 +176,24 @@ const GetMeta = (buff) => {
 }
 
 const ReadFile = (fp, print=true) => {
-    let content = fs.readFileSync(fp)
+    try {
+        let content = fs.readFileSync(fp)
 
-    if (!print) {
-        printContent(content)
+        if (!print) {
+            printContent(content)
+        }
+
+        return content
+    } catch (e) {
+        // File does not exist
+        throw `[FileError] ${e.message.split(':')[1]}`
     }
-
-    return content
 }
 
-const WriteFile = (fp, data, ext='.drln') => {
-    if (Buffer.isBuffer(ext)) {
-        // Only attempt to sanitize if buffer
-        ext = getExtension(ext)
-    }
-
-    let lastDotIdx = fp.lastIndexOf('.')
-    let outfp = path.extname(fp) ? 
-                fp.slice(0, lastDotIdx) + ext : fp + ext
+const WriteFile = (fp, data, ext='drln') => {
+    // NOTE: Remember the 'ext' overrides whatever ext 'fp' carries
+    // Sanitized output: properly joined fp and ext
+    let outfp = StripMerge(fp, ext)
 
     fs.writeFileSync(outfp, data)
 
@@ -157,4 +201,4 @@ const WriteFile = (fp, data, ext='.drln') => {
     return outfp
 }
 
-module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent }
+module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, SplitFP, StripMerge }

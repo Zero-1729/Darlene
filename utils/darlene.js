@@ -1,12 +1,12 @@
-const fs = require('fs')
-
-const crypto = require('crypto')
 const { HexToBuffer } = require('./hex')
 const { CreateData, GetMeta, ReadFile } = require('./file')
 const { AbbvEnconding, ExpandEncoding } = require('./encoding')
 
+const fs = require('fs')
+const crypto = require('crypto')
+
 /*
-* Uses AES CBC/GCM Symmetric Cipher To Encrypt/Decrypt inputs
+* Uses AES CBC/GCM Cipher To Encrypt/Decrypt inputs
 */
 
 /*
@@ -121,29 +121,30 @@ const GetAuthTag = (passphrase, iv, cryptedText) => {
 }
 
 
-/* String, JSON & Buffer (D)Encryption */
+/* String, JSON & Buffer Encryption/Decryption */
 
 /*
 *  Encrypts data (string/JSON/Buffer) using using key created from passphrase.
-*  Outputs an object containing;
-*                   the Initialization Vector(iv)
-*                   and encrypted data (hash)
+*  Outputs darlene data
 *
 *  Inputs:
 *
 *  passphrase -> (String)
 *  buff -> (String | Buffer | JSON)
+*  meta -> [object] metadata for darlene
 *
 *  Output:
 *
 *  [object]:
 *               iv -> Initialization Vector <Buffer>
 *               hash -> (String)
-*               keylength -> <String>; defaults to '128'
+*               keylength -> <Number>
 *               tag -> Auth Tag
 *               encoding -> text encoding; defaults to 'hex'
 *               mode -> AES mode; defaults to gcm
-*               isJSON -> whether encrypted data s JSON
+*               isJSON -> whether encrypted data is JSON
+*               isBinary -> whether encrypted data is binary content
+*               ext -> file extension. Defaults to 'txt'
 *
 */
 
@@ -170,6 +171,14 @@ const EncryptFlat = (passphrase, data, meta) => {
     // Generate tag from 'passphrase', 'iv', and 'cipher text'
     let tag = meta.mode == 'gcm' ? cipher.getAuthTag() : GetAuthTag(passphrase, iv, content)
 
+    // Determine ext
+    if (meta.ext) {
+        meta.ext[0] == '.' ? meta.ext.slice(1) : meta.ext
+    } else {
+        // Default is text file
+        meta.ext = 'txt'
+    }
+
     return CreateData({
         mode: meta.mode,
         iv: iv,
@@ -178,28 +187,26 @@ const EncryptFlat = (passphrase, data, meta) => {
         tag: tag,
         hash: content,
         isJSON: meta.isJSON,
-        ext: meta.ext || null
+        isBinary: meta.isBinary,
+        ext: meta.ext
     })
 }
 
 
 /*
 *
-*  Decrypts data ('hash') using using key created from passphrase.
-*  Outputs an object containing;
-*                   the Initialization Vector(iv)
-*                   and decrypted data (text)
+*  Decrypts data using using key created from passphrase.
+*  Outputs decrypted buffer or text
 *
 *  Inputs:
 *
-*  passphrase   -> (String)
-*  hash         -> (String | Buffer)
-*  iv           -> Initialization Vector
+*  passphrase                    -> (String)
+*  darlene data | darlene meta   -> (Buffer) | (Object)
 *
 *  Output:
 *
 *  [object]:
-*               text  -> (String)
+*               decrypted data  -> (String) | (Buffer) if binary data
 *
 */
 
@@ -259,15 +266,13 @@ const DecryptFlat = (passphrase, data) => {
 
 /*
 *  Encrypts a file using using key created from passphrase.
-*  Outputs an object containing;
-*                   the Initialization Vector(iv)
-*                   and encrypted data (hash)
+*  Outputs darlene data (buffer)
 *
 *  Inputs:
 *
 *  passphrase -> (String)
 *  path -> string
-*  meta -> [object]; encoding, iv, mode, isJOSN, keylength
+*  meta -> [object]; encoding, iv, mode, isJOSN, isBinary, keylength
 *
 *  Output:
 *
@@ -279,21 +284,18 @@ const DecryptFlat = (passphrase, data) => {
 *               encoding -> text encoding; defaults to 'hex'
 *               mode -> AES mode; defaults to gcm
 *               isJSON -> whether encrypted data is JSON (auto false)
+*               isBinary -> whether encrypted data is binary content
 *               ext -> file extention
 *
 */
 
 const EncryptFileSync = (passphrase, fp, meta) => {
-    // Note: if you are trying to encrypt text file
-    // ... leave the 'ext' field as 'null' in the 'meta'
-    meta.ext = fp.slice(fp.lastIndexOf('.')+1)
-
     let buff
 
     try {
         buff = fs.readFileSync(fp)
     } catch (e) {
-        throw `[Couldn't read file '${fp}': ${e.message}`
+        throw `[FileError] ${e.message.split(':')[1]}`
     }
 
     // create cipher
@@ -303,7 +305,7 @@ const EncryptFileSync = (passphrase, fp, meta) => {
     let cipher = CreateCipher({keylength: meta.keylength, mode: meta.mode, key: key, iv: iv})
 
     // If we are encoding binary data 'non-text files' we have to specify
-    let data_format = meta.ext ? 'binary' : 'utf8'
+    let data_format = meta.isBinary ? 'binary' : 'utf8'
     
     let encrypted = cipher.update(buff, data_format, meta.encoding)
 
@@ -315,7 +317,14 @@ const EncryptFileSync = (passphrase, fp, meta) => {
     meta.hash = encrypted
     meta.iv = iv
     meta.tag = tag
-    meta.ext = meta.ext || null
+
+    // Determine ext
+    if (meta.ext) {
+        meta.ext[0] == '.' ? meta.ext.slice(1) : meta.ext
+    } else {
+        // Default is text file
+        meta.ext = 'txt'
+    }
 
     return CreateData(meta)
 }
@@ -323,21 +332,18 @@ const EncryptFileSync = (passphrase, fp, meta) => {
 
 /*
 *
-*  Decrypts data ('hash') using using key created from passphrase.
-*  Outputs an object containing;
-*                   the Initialization Vector(iv)
-*                   and decrypted data (text)
+*  Decrypts darlene data using using key created from passphrase.
+*  Outputs an object containing decrypted data (text | buffer)
 *
 *  Inputs:
 *
 *  passphrase   -> (String)
-*  hash         -> (String | Buffer)
-*  iv           -> Initialization Vector
+*  fp           -> (String) Darlene file
 *
 *  Output:
 *
 *  [object]:
-*               text  -> (String)
+*               text  -> (String) | (Buffer) if content is binary
 *
 */
 
@@ -372,13 +378,13 @@ const DecryptFileSync = (passphrase, fp) => {
 
         try {
             // Binary data isn't decoded with 'utf8'
-            let data_format = meta.ext ? ExpandEncoding(meta.encoding) : 'utf8'
+            let data_format = meta.isBinary ? ExpandEncoding(meta.encoding) : 'utf8'
             let decrypted = decipher.update(content, ExpandEncoding(meta.encoding), data_format)
 
             decrypted += decipher.final(data_format)
 
             // Re-convert binary data to Buffer
-            decrypted = meta.ext ? Buffer.from(decrypted, ExpandEncoding(meta.encoding)) : decrypted
+            decrypted = meta.isBinary ? Buffer.from(decrypted, ExpandEncoding(meta.encoding)) : decrypted
 
             // Writing file should be handled externally
             return {plain: decrypted, metas: meta}
@@ -391,14 +397,14 @@ const DecryptFileSync = (passphrase, fp) => {
         // GCM mode
 
         // Binary data isn't decoded with 'utf8'
-        let data_format = meta.ext ? ExpandEncoding(meta.encoding) : 'utf8'
+        let data_format = meta.isBinary ? ExpandEncoding(meta.encoding) : 'utf8'
         let decrypted = decipher.update(content, ExpandEncoding(meta.encoding), data_format)
 
         try {
             decrypted += decipher.final(data_format)
 
             // Re-convert binary data to Buffer
-            decrypted = meta.ext ? Buffer.from(decrypted, ExpandEncoding(meta.encoding)) : decrypted
+            decrypted = meta.isBinary ? Buffer.from(decrypted, ExpandEncoding(meta.encoding)) : decrypted
 
             // Writing file should be handled externally
             return {plain: decrypted, metas: meta}

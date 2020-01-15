@@ -9,7 +9,8 @@ let blob = EncryptFlat(secret, text, {
     mode: 'gcm',
     keylength: 256,
     encoding: 'base64',
-    isJSON: false
+    isJSON: false,
+    isBinary: false
 })
 
 let meta = GetMeta(blob)
@@ -18,4 +19,4 @@ PrintContent(blob)
 
 let decrypted = DecryptFlat(ReadInput('Enter secret: '), meta)
 
-console.log(`Decrypted:\n\n'${decrypted}'`)
+console.log(`\nDecrypted:\n\n'${decrypted}'`)

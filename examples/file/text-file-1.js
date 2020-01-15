@@ -14,7 +14,8 @@ WriteFile(fp, EncryptFlat(secret, text, {
     mode: 'gcm',
     keylength: 256,
     encoding: 'base64',
-    isJSON: false
+    isJSON: false,
+    isBinary: false
 }))
 
 let decrypted = DecryptFlat(ReadInput('Enter Passphrase: '), ReadFile(efp))

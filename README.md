@@ -1,6 +1,8 @@
 # Darlene
 
-A Symmetric Encryption Toolchain.
+A Symmetric Encryption Tool.
+
+![darlene](./darlene.png)
 
 ---
 
@@ -9,6 +11,10 @@ A Symmetric Encryption Toolchain.
 This allows Darlene preserve the necessary metadata for decrypting the data later on.
 
 ---
+
+> **Tip**: After decrypting, remember to convert back to `Buffer`; hex/base64 string is returned. 
+> 
+> Check [the sample code](./examples/buffer/buffer.js) for more info.
 
 - Darlene can Encrypt/Decrypt:
     - [x] JSON
@@ -19,12 +25,15 @@ This allows Darlene preserve the necessary metadata for decrypting the data late
 
 ---
 
-# Install
+# Install CLI
 
-## Node repo
+## NPM
 
 ```sh
 npm install -g darlene
+
+# Note: If you get an 'EACCES' error run the command below instead
+sudo npm install -g . --unsafe-perm=true --allow-root
 ```
 
 ## Locally
@@ -45,10 +54,13 @@ sudo npm install -g . --unsafe-perm=true --allow-root
 
 # Uninstall
 
-## Node repo
+## NPM
 
 ```sh
 npm uninstall -g darlene
+
+# Note: If you get an 'EACCES' error run the command below instead
+sudo npm install -g . --unsafe-perm=true --allow-root
 ```
 
 ## Locally
@@ -62,4 +74,4 @@ sudo npm install -g . --unsafe-perm=true --allow-root
 
 ---
 
-MIT &copy; 2019 (Zero1729)
+MIT &copy; 2019 (Zero-1729)

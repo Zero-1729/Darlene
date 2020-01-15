@@ -1,8 +1,8 @@
 #!/usr/local/bin/node
 
-const { buildMeta, sanitizeArgs, checkSemantics, isDarleneFile } = require('../utils/trenton')
+const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
 const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
-const { ReadFile, WriteFile, GetMeta } = require('./../utils/file')
+const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, SplitFP, GetExt } = require('./../utils/file')
 const { ReadInput } = require('./../utils/psswd')
 
 
@@ -28,12 +28,12 @@ const help = () => {
     console.log("-B  --binary\t\targs: - \t\tFlag to indicate the input file is a binary file.\n\n\t\t\tDefaults to false when left out")
 
     console.log("\nExamples:")
-    console.log("\n\tdarlene -c 'Hello world' --show -E")
-    console.log("\tdarlene --content='Hello world' -o . -E --show") // REM: Creates a 'txt' file by default
-    console.log("\n\tdarlene -f plain.txt -k 192 -E")
-    console.log("\tdarlene -f crypted.drln -o ~/Documents/ --mode cbc --keylength 128 -D")
-    console.log("\tdarlene -f image.png -B -o ~/Pictures -x base64 -E\n")
-    console.log("\tdarlene -f password -B -o ~/Pictures -x base64 -E\n")
+    console.log("\n\tdarlene -c 'Hello, friend' -E -o test --show")
+    console.log("\tdarlene -f ./test.txt -o ./hello -D --show")
+    console.log("\n\tdarlene -f plain.txt -k 192 -o crypted -E")
+    console.log("\tdarlene -f crypted.drln -o ~/Documents/decrypted --mode cbc --keylength 128 -D")
+    console.log("\tdarlene -f image.png -B -o ~/Pictures/image -x base64 -E\n")
+    console.log("\tdarlene -f wallet_words.txt -o ./wallet_words -x base64 -E\n")
 }
 
 // Our synthetic main fn
@@ -49,20 +49,11 @@ const help = () => {
             // Meta needed by Darlene
             let metas = buildMeta(args)
 
-            console.log(metas)
-
             // Semantic pass
             checkSemantics(metas)
 
             // Exec pass
             //
-            // Set ext value
-            if (metas.ext) {
-                // Remember that the 'binary' option set this to true
-                // ... now we fill it in with the actual ext value
-                metas.ext = metas.file.slice(metas.file.lastIndexOf('.') + 1)
-            } 
-
             // Accept secret here
             const key = ReadInput("Enter passphrase: ")
 
@@ -73,7 +64,9 @@ const help = () => {
                 mode: metas.mode,
                 keylength: metas.keylength,
                 encoding: metas.encoding,
-                isJSON: metas.isJSON
+                isJSON: metas.isJSON,
+                isBinary: metas.isBinary,
+                ext: 'txt'
             }
             
             // Handle encryption
@@ -86,33 +79,41 @@ const help = () => {
                     console.log('[*] Attempting to write encrypted content to file...')
                     let outfp = WriteFile(metas.out, blob)
 
+                    if (metas.show) {
+                        let hash = GetMeta(blob).hash
+
+                        console.log('[+] hash: ', hash)
+                    }
+
                     console.log(`[+] Wrote file: '${outfp}'`)
                 } else {
                     // handle file
                     // Add extra fields in meta
-                    let fp = metas.file
-                    let efp = isDarleneFile(metas.out) ? metas.out : metas.out + '.drln'
+                    let ifp = metas.file
+                    let { fp, ext} = SplitFP(metas.out)
+
+                    // Override file ext
+                    ext = isDarleneFile(metas.out) ? ext : 'drln'
                     
                     console.log(`[*] Checking input file content type...`)
-                    // Hadler for binary files
-                    if (metas.binary) {
-                        meta.ext = metas.ext
-                    } else {
-                        meta.ext = null
-                    }
+                    // File ext darlene would store
+                    // Grab it from input file
+                    // Defaults to 'txt'
+                    meta.ext = SplitFP(metas.file).ext
 
                     console.log(`[*] Encrypting file contents...`)
-                    let buff = EncryptFileSync(key, fp, meta)
+                    let buff = EncryptFileSync(key, ifp, meta)
 
-                    console.log(`[*] Writing encrypted content to file: '${efp}'...`)
-                    let outfp = WriteFile(efp, buff)
+                    // We have to rejoin when file we are writing to
+                    console.log(`[*] Writing encrypted content to file: '${fp + '.' + ext}'...`)
+                    let outfp = WriteFile(fp, buff, ext)
 
                     console.log(`[+] Wrote file: '${outfp}'`)
                 }
             } else {
                 // Handle decryption
                 let decrypted
-                let fp = metas.out
+                let {fp, ext} = SplitFP(metas.out)
 
                 if (metas.content) {
                     // Handle content decryption
@@ -130,7 +131,7 @@ const help = () => {
                         console.log(`\n${decrypted}\n`)
                     }
 
-                    let outfp = WriteFile(fp, decrypted, '.txt')
+                    let outfp = WriteFile(fp, decrypted, ext)
                     console.log(`[+] Wrote content to file: ${outfp}`)
                 } else {
                     // Handle (darlene) file decryption
@@ -141,41 +142,31 @@ const help = () => {
                     let blob = ReadFile(fp)
 
                     console.log('[*] Attempting to decrypt content...')
-                    decrypted = DecryptFileSync(key, fp)
+                    decrypted = DecryptFileSync(key, fp).plain
 
                     // Extract new file content
                     console.log('[*] Extracting encrypted file extension...')
                     let file_info = GetMeta(blob)
 
-                    let efp
-                    let ext = meta.ext
+                    let efp = metas.out ? metas.out : fp
+                    // Remember 'drln' does not store dot
+                    ext = GetExt(file_info.ext)
                     
-                    console.log('[*] Creating file path to write content...')
-                    if (file_info.ext) {
-                        // binary file
-                        efp = metas.out ? 
-                              metas.out.slice(0, metas.out.lastIndexOf('.')) : 
-                              fp.slice(0, fp.lastIndexOf('.'))
-                    } else {
-                        // text/json file
-                        if (metas.isJSON) {
-                            efp = metas.out ? 
-                                  metas.out.slice(0, metas.out.lastIndexOf('.')) : 
-                                  fp.slice(0, fp.lastIndexOf('.'))
-
-                            ext = '.json'
-                        } else {
-                            efp = metas.out ? 
-                                  metas.out.slice(0, metas.out.lastIndexOf('.')) : 
-                                  fp.slice(0, fp.lastIndexOf('.'))
-
-                            ext = '.txt'
-                        }
+                    console.log('[*] Determining content type...')
+                    // Check if text file from ext
+                    // We know it is a text file if its neither binary or is json or 
+                    // ... ext field left out (default to 'txt')
+                    if (isEmptyBuffer(file_info.ext) || (!file_info.isBinary || file_info.isJSON)) {
+                        // Stringify text
+                        decrypted = decrypted.toString()
                     }
+
+                    // 
+                    console.log(`[+] Content is ${file_info.isBinary ? 'binary' : (file_info.isJSON ? 'json' : 'text')} data`)
 
                     if (metas.show) {
                         console.log('[+] Recovered:')
-                        console.log(decrypted)
+                        console.log("\n", decrypted, "\n")
                     }
 
                     let outfp = WriteFile(efp, decrypted, ext)
