@@ -2,6 +2,8 @@
 * Trenton: A small hacky commandline wrangler
 */
 
+const path = require('path')
+
 const { isDarleneFile, isValidPath } = require('./file')
 
 // Easily translate some options to metas key
@@ -225,6 +227,11 @@ const checkSemantics = (metas) => {
     // Check that both binary and json flag not used together
     if (metas.isBinary && metas.isJSON) {
         throw `darlene: cannot use both binary (-B) and json (-J) flag.`
+    }
+
+    // Raw content needs full output path to be specified
+    if (metas.content && (path.extname(metas.out)).length == 0) {
+        throw `darlene: must specify a full output (with extension) with -c flag`
     }
 
     // Warn user that 'mode', 'keylength', 'iv', 'tag', 'encoding', 'isJSON' & 'ext'
