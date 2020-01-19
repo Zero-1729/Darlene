@@ -29,7 +29,7 @@ const help = () => {
 
     console.log("\nExamples:")
     console.log("\n\tdarlene -c 'Hello, friend' -E -o test --show")
-    console.log("\tdarlene -f ./test.txt -o ./hello -D --show")
+    console.log("\tdarlene -f ./test.drln -o ./hello -D --show")
     console.log("\n\tdarlene -f plain.txt -k 192 -o crypted -E")
     console.log("\tdarlene -f crypted.drln -o ~/Documents/decrypted --mode cbc --keylength 128 -D")
     console.log("\tdarlene -f image.png -B -o ~/Pictures/image -x base64 -E\n")
