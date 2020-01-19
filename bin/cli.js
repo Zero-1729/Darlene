@@ -1,5 +1,7 @@
 #!/usr/local/bin/node
 
+const path = require('path')
+
 const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
 const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
 const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, SplitFP, GetExt } = require('./../utils/file')
@@ -113,7 +115,19 @@ const help = () => {
             } else {
                 // Handle decryption
                 let decrypted
-                let {fp, ext} = SplitFP(metas.out)
+
+                // Gather pieces of the puzzle
+                let ofp = SplitFP(metas.out)
+
+                let output_fp = ofp.fp
+                let output_fp_ext = GetExt(ofp.ext)
+
+                // Set output file path to input's if folder specified instead
+                // But only if the input path specified
+                if (!path.extname(metas.out) && metas.file) {
+                    output_fp = path.join(metas.out, SplitFP(metas.file).fp)
+                    output_fp_ext = GetExt(meta.ext)
+                }
 
                 if (metas.content) {
                     // Handle content decryption
@@ -131,24 +145,23 @@ const help = () => {
                         console.log(`\n${decrypted}\n`)
                     }
 
-                    let outfp = WriteFile(fp, decrypted, ext)
-                    console.log(`[+] Wrote content to file: ${outfp}`)
+                    let written_out_fp = WriteFile(output_fp + '.' + output_fp_ext, decrypted, output_fp_ext)
+                    console.log(`[+] Wrote content to file: ${written_out_fp}`)
                 } else {
                     // Handle (darlene) file decryption
                     // file path
-                    let fp = metas.file
+                    let raw_input_fp = metas.file
 
                     console.log('[*] Reading encrypted content...')
-                    let blob = ReadFile(fp)
+                    let blob = ReadFile(raw_input_fp)
 
                     console.log('[*] Attempting to decrypt content...')
-                    decrypted = DecryptFileSync(key, fp).plain
+                    decrypted = DecryptFileSync(key, raw_input_fp).plain
 
                     // Extract new file content
                     console.log('[*] Extracting encrypted file extension...')
                     let file_info = GetMeta(blob)
 
-                    let efp = metas.out ? metas.out : fp
                     // Remember 'drln' does not store dot
                     ext = GetExt(file_info.ext)
                     
@@ -161,7 +174,7 @@ const help = () => {
                         decrypted = decrypted.toString()
                     }
 
-                    // 
+                    // Determine content type 
                     console.log(`[+] Content is ${file_info.isBinary ? 'binary' : (file_info.isJSON ? 'json' : 'text')} data`)
 
                     if (metas.show) {
@@ -169,8 +182,9 @@ const help = () => {
                         console.log("\n", decrypted, "\n")
                     }
 
-                    let outfp = WriteFile(efp, decrypted, ext)
-                    console.log(`[+] Wrote content to file: '${outfp}'`)
+                    // Write content
+                    let written_out_fp = WriteFile(output_fp +'.' + output_fp_ext, decrypted, ext)
+                    console.log(`[+] Wrote content to file: '${written_out_fp}'`)
                 }
             }
         } catch (e) {
