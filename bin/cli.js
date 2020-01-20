@@ -5,7 +5,7 @@ const fs   = require('fs')
 
 const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
 const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
-const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, SplitFP, GetExt } = require('./../utils/file')
+const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, SplitFP, StripMerge, GetExt } = require('./../utils/file')
 const { ReadInput } = require('./../utils/psswd')
 
 
@@ -26,9 +26,10 @@ const help = () => {
     console.log("-t  --tag\t\targs: <tag> \t\tSpecify Tag.\n\n\t\t\tRequired if '-D' flag included.\n\n")
     console.log("-E  --encrypt\t\targs: - \t\tRequired flag to indicate whether to encrypt.\n\n")
     console.log("-D  --decrypt\t\targs: - \t\tRequired flag to indicate whether to decrypt.\n\n")
-    console.log("-J  --json\t\targs: - \t\tFlag to indicate content type of plain text.\n\n\t\t\tDefaults to false when left out.\n\n")
-    console.log("-S  --show\t\targs: - \t\tFlag to show contents of file written.\n\n\t\t\tDefaults to false when left out.")
-    console.log("-B  --binary\t\targs: - \t\tFlag to indicate the input file is a binary file.\n\n\t\t\tDefaults to false when left out")
+    console.log("-J  --json\t\targs: - \t\tFlag to indicate content type of plain text.\n\n\t\t\tDefaults to false.\n\n")
+    console.log("-S  --show\t\targs: - \t\tFlag to show contents of file written.\n\n\t\t\tDefaults to false.")
+    console.log("-B  --binary\t\targs: - \t\tFlag to indicate the input file is a binary file.\n\n\t\t\tDefaults to false.")
+    console.log("-C  --concat\t\targs: - \t\tFlag to indicate whether 'drln' extension in decryption should be concatenated with output file extension.\n\n\t\tDefaults to false.")
 
     console.log("\nExamples:")
     console.log("\n\tdarlene -c 'Hello, friend' -E -o test --show")
@@ -194,8 +195,22 @@ const help = () => {
                         console.log("\n", decrypted, "\n")
                     }
 
+                    // If concat on, then we pass both exts
+                    if (!metas.concat) {
+                        // Else we override it with the one darlene stored
+                        output_fp_ext = ext
+                    }
+
+                    // Check if it exists first to warn the user of a file overwrite
+                    // Basically preemptively perform all checks before hand
+                    let file_to_check = metas.concat ? 
+                                        (path.extname(output_fp+'.'+output_fp_ext).length > 0 ? 
+                                        output_fp + '.' + output_fp_ext + '.' + ext : 
+                                        output_fp + '.' + output_fp_ext) 
+                                        : StripMerge(output_fp+'.'+output_fp_ext, ext)
+
                     // Write content
-                    let written_out_fp = WriteFile(output_fp +'.' + output_fp_ext, decrypted, ext)
+                    let written_out_fp = WriteFile(output_fp+'.'+output_fp_ext, decrypted,  ext, metas.concat)
                     console.log(`[+] Wrote content to file: '${written_out_fp}'`)
                 }
             }

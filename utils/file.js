@@ -27,7 +27,12 @@ const GetExt = (buff) => {
            buff.replace(/\.*/, '')
 }
 
-const SplitFP = (fp) => {
+const SplitFP = (fp, single=false) => {
+    // strip entire path except file name
+    if (single) {
+        fp = path.basename(fp)
+    }
+
     // returns the file path and extension
     if (path.extname(fp).length > 0) {
         // Returns the file path stripped of its ext alongside the ext
@@ -190,10 +195,18 @@ const ReadFile = (fp, print=true) => {
     }
 }
 
-const WriteFile = (fp, data, ext='drln') => {
+const WriteFile = (fp, data, ext='drln', concat=false) => {
     // NOTE: Remember the 'ext' overrides whatever ext 'fp' carries
     // Sanitized output: properly joined fp and ext
     let outfp = StripMerge(fp, ext)
+
+    // console.log('<> ', fp, ext, concat)
+
+    // Check of concatenation enabled
+    if (concat) {
+        // We can only concat if extension exists
+        outfp = path.extname(fp).length > 0 ? fp + '.' + ext : outfp
+    }
 
     fs.writeFileSync(outfp, data)
 

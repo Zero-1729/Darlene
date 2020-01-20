@@ -13,6 +13,7 @@ const meta_aliases = {
     'k': 'keylength',
     'x': 'encoding',
     'c': 'content',
+    'C': 'concat',
     'f': 'file',
     'o': 'out',
     's': 'show',
@@ -34,6 +35,8 @@ const valid_args = [ '-h',
                     '--help',
                     '-c', 
                     '--content',
+                    '-C',
+                    '--concat',
                     '-f',
                     '--file',
                     '-o',
@@ -60,7 +63,7 @@ const valid_args = [ '-h',
                     '--show' ]
 
 // Our single character flags and their expanded versions
-const flags = ['B', 'binary', 'E', 'encrypt', 'D', 'decrypt', 'J', 'json', 'S', 'show']
+const flags = ['C', 'concat', 'B', 'binary', 'E', 'encrypt', 'D', 'decrypt', 'J', 'json', 'S', 'show']
 
 const joinArray = (arr) => {
     // Function returns a stringified array in the form '<elm>, <elm>, ... or <elm>'
@@ -202,6 +205,16 @@ const checkSemantics = (metas) => {
         throw `darlene: cannot encrypt a darlene ('drln') file`
     }
 
+    // Check that concat option provided in proper operation mode (decryption)
+    if (metas.concat && !metas.decrypt) {
+        throw `darlene: -C (or --concat) flag can only be used with the -D flag.`
+    }
+
+    // Warn that concat has no effect in encryption of raw content
+    if (metas.concat && metas.encrypt && metas.content) {
+        throw `darlene: -C (or --concat) flag has no effect.`
+    }
+
     // Check whether IV provoded in decrypt mode
     // Dependent options (iv <-> decrypt) for raw content
     if (metas.iv == null && metas.decrypt && metas.content) {
@@ -264,6 +277,7 @@ const buildMeta = (args) => {
         file: null,
         out: null,
         content: null,
+        concat: false,
         show: false,
         encrypt: false,
         decrypt: false
