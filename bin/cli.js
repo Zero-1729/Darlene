@@ -24,6 +24,7 @@ const help = () => {
     console.log("-x  --encoding\t\targs: <encoding> \t\tSpecify the encoding for hash(es), values are either 'hex' or 'base64'.\n\n\t\t\tDefaults to 'hex' if this flag not specified.\n\n")
     console.log("-i  --iv\t\targs: <iv> \t\tSpecify Initialization vector.\n\n\t\t\tRequired if '-D' flag included.\n\n")
     console.log("-t  --tag\t\targs: <tag> \t\tSpecify Tag.\n\n\t\t\tRequired if '-D' flag included.\n\n")
+    console.log("-w  --words\t\targs: <word count> \t\tSpecify the number of words to encrypt\n\n\t\tOnly useable with '-E' and '-c' flags\n\n")
     console.log("-E  --encrypt\t\targs: - \t\tRequired flag to indicate whether to encrypt.\n\n")
     console.log("-D  --decrypt\t\targs: - \t\tRequired flag to indicate whether to decrypt.\n\n")
     console.log("-J  --json\t\targs: - \t\tFlag to indicate content type of plain text.\n\n\t\t\tDefaults to false.\n\n")
@@ -72,12 +73,17 @@ const help = () => {
                 isBinary: metas.isBinary,
                 ext: 'txt'
             }
-            
+
+            // Override ext if words count added
+            // ... as we are encrypting an array of words
+            if (metas.words > 0) {
+                meta.ext = 'json'
+            }
+
             // Handle encryption
             if (metas.encrypt) {
                 // Gather pieces of the puzzle
                 let ofp = SplitFP(metas.out)
-                let ifp = SplitFP(metas.file)
 
                 let output_fp = ofp.fp
                 let output_fp_ext = ofp.ext ? GetExt(ofp.ext) : ext
@@ -93,7 +99,23 @@ const help = () => {
                 output_fp_ext = !isDarleneFile(metas.out) ? 'drln' : output_fp_ext
 
                 // hanlde raw content
-                if (metas.content) {
+                if (metas.content || (metas.words > 0)) {
+                    // Get words if '-w' (or --words) flag provided
+                    if (metas.words > 0) {
+                        let words = []
+
+                        console.log(`\nEnter words below:\n`)
+
+                        for (var i = 0;i < metas.words;i++) {
+                            words.push(ReadInput(`${i} (hit enter): `))
+                        }
+
+                        metas.content = JSON.stringify(words, null, 2)
+
+                        // Manually add content type
+                        meta.isJSON = true
+                    }
+
                     console.log('[*] Attempting to encrypt content...')
                     let blob = EncryptFlat(key, metas.content, meta)
                     
@@ -118,6 +140,9 @@ const help = () => {
 
                     console.log(`[+] Wrote file: '${out_fp}'`)
                 } else {
+                    // Obtain remaining file info
+                    let ifp = SplitFP(metas.file)
+
                     console.log(`[*] Checking input file content type...`)
                     // File ext darlene would store
                     // Grab it from input file
@@ -211,7 +236,7 @@ const help = () => {
                     // ... ext field left out (default to 'txt')
                     if (isEmptyBuffer(file_info.ext) || (!file_info.isBinary || file_info.isJSON)) {
                         // Stringify text
-                        decrypted = decrypted.toString()
+                        decrypted = file_info.isJSON ? JSON.parse(decrypted) : decrypted.toString()
                     }
 
                     // Determine content type 

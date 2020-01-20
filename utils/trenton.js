@@ -20,7 +20,8 @@ const meta_aliases = {
     'e': 'encrypt',
     'd': 'decrypt',
     'i': 'iv',
-    't': 'tag'
+    't': 'tag',
+    'w': 'words'
 }
 
 // To manage valid option arguments
@@ -51,6 +52,8 @@ const valid_args = [ '-h',
                     '--iv',
                     '-t',
                     '--tag',
+                    '-w',
+                    '--words',
                     '-E',
                     '--encrypt',
                     '-D',
@@ -210,6 +213,16 @@ const checkSemantics = (metas) => {
         throw `darlene: -C (or --concat) flag can only be used with the -D flag.`
     }
 
+    // words (-w or --words) flag can only be used when encrypting
+    if ((metas.words > 0) && !metas.encrypt) {
+        throw `darlene: -w (or --words) flag can only be used when encryptng (-E)`
+    }
+
+    // must provide a full path with the words path
+    if ((metas.words > 0) && (!path.extname(metas.out) > 0)) {
+        throw `darlene: file output path must carry a file extension when using the -w (or --words) flag`
+    }
+
     // Check whether IV provoded in decrypt mode
     // Dependent options (iv <-> decrypt) for raw content
     if (metas.iv == null && metas.decrypt && metas.content) {
@@ -223,9 +236,9 @@ const checkSemantics = (metas) => {
     }
 
     // Check that input file provided when binary and or encrypt flags on
-    if ((metas.isBinary || metas.encrypt) && !metas.content && (!metas.file)) {
+    /*if ((metas.isBinary || metas.encrypt) && !metas.content && !(metas.words > 0) && (!metas.file)) {
         throw `darlene: must provide input file path with decrypt flag${metas.isBinary && metas.file ? ' and ' : ''}${metas.isBinary ? 'binary flag' : ''}`
-    }
+    }*/
 
     // Check whether non darlene file provided with decrypt op
     if ((metas.decrypt) && (!isDarleneFile(metas.file) && metas.content == null)) {
@@ -236,6 +249,12 @@ const checkSemantics = (metas) => {
     if (metas.isBinary && metas.isJSON) {
         throw `darlene: cannot use both binary (-B) and json (-J) flag.`
     }
+
+    // Check that the words (-w) flag in the encryption mode (-E)
+    // .. and can't be used with the content (-c) or file (-f) flag
+    if ((metas.words > 0) && (metas.content || metas.file)) {
+        throw `darlene: -w (or --words) flag cannot be used with the content (-c) or file (-f) flag`
+    }  
 
     // Raw content needs full output path to be specified
     if (metas.content && (path.extname(metas.out)).length == 0) {
@@ -272,6 +291,7 @@ const buildMeta = (args) => {
         file: null,
         out: null,
         content: null,
+        words: 0, // Actual count of words to encrypt, for wallet mnemonics and such
         concat: false,
         show: false,
         encrypt: false,
