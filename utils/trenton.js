@@ -210,11 +210,6 @@ const checkSemantics = (metas) => {
         throw `darlene: -C (or --concat) flag can only be used with the -D flag.`
     }
 
-    // Warn that concat has no effect in encryption of raw content
-    if (metas.concat && metas.encrypt && metas.content) {
-        throw `darlene: -C (or --concat) flag has no effect.`
-    }
-
     // Check whether IV provoded in decrypt mode
     // Dependent options (iv <-> decrypt) for raw content
     if (metas.iv == null && metas.decrypt && metas.content) {
