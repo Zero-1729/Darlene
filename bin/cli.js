@@ -1,6 +1,7 @@
 #!/usr/local/bin/node
 
 const path = require('path')
+const fs   = require('fs')
 
 const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
 const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
@@ -73,13 +74,31 @@ const help = () => {
             
             // Handle encryption
             if (metas.encrypt) {
+                // Gather pieces of the puzzle
+                let ofp = SplitFP(metas.out)
+                let ifp = SplitFP(metas.file)
+
+                let output_fp = ofp.fp
+                let output_fp_ext = ofp.ext ? GetExt(ofp.ext) : ext
+
+                // Set output file path to input's if folder specified instead
+                // But only if the input path specified
+                if (!path.extname(metas.out)) {
+                    output_fp = path.join(metas.out, SplitFP(metas.file).fp)
+                    output_fp_ext = GetExt(meta.ext)
+                }
+
+                // Override file ext
+                output_fp_ext = !isDarleneFile(metas.out) ? 'drln' : output_fp_ext
+
                 // hanlde raw content
                 if (metas.content) {
                     console.log('[*] Attempting to encrypt content...')
                     let blob = EncryptFlat(key, metas.content, meta)
                     
                     console.log('[*] Attempting to write encrypted content to file...')
-                    let outfp = WriteFile(metas.out, blob)
+
+                    let out_fp = WriteFile(output_fp, blob)
 
                     if (metas.show) {
                         let hash = GetMeta(blob).hash
@@ -87,16 +106,8 @@ const help = () => {
                         console.log('[+] hash: ', hash)
                     }
 
-                    console.log(`[+] Wrote file: '${outfp}'`)
+                    console.log(`[+] Wrote file: '${out_fp}'`)
                 } else {
-                    // handle file
-                    // Add extra fields in meta
-                    let ifp = metas.file
-                    let { fp, ext} = SplitFP(metas.out)
-
-                    // Override file ext
-                    ext = isDarleneFile(metas.out) ? ext : 'drln'
-                    
                     console.log(`[*] Checking input file content type...`)
                     // File ext darlene would store
                     // Grab it from input file
@@ -104,13 +115,14 @@ const help = () => {
                     meta.ext = SplitFP(metas.file).ext
 
                     console.log(`[*] Encrypting file contents...`)
-                    let buff = EncryptFileSync(key, ifp, meta)
+                    let buff = EncryptFileSync(key, ifp.fp + '.' + ifp.ext, meta)
 
                     // We have to rejoin when file we are writing to
-                    console.log(`[*] Writing encrypted content to file: '${fp + '.' + ext}'...`)
-                    let outfp = WriteFile(fp, buff, ext)
+                    console.log(`[*] Writing encrypted content to file: '${output_fp + '.' + output_fp_ext}'...`)
 
-                    console.log(`[+] Wrote file: '${outfp}'`)
+                    let out_fp = WriteFile(output_fp, buff, output_fp_ext)
+
+                    console.log(`[+] Wrote file: '${out_fp}'`)
                 }
             } else {
                 // Handle decryption
@@ -124,8 +136,8 @@ const help = () => {
 
                 // Set output file path to input's if folder specified instead
                 // But only if the input path specified
-                if (!path.extname(metas.out) && metas.file) {
-                    output_fp = path.join(metas.out, SplitFP(metas.file).fp)
+                if (!path.extname(metas.out) && fs.existsSync(metas.out) && metas.file) {
+                    output_fp = path.join(metas.out, SplitFP(metas.file, true).fp)
                     output_fp_ext = GetExt(meta.ext)
                 }
 
