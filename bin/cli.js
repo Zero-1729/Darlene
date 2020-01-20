@@ -99,6 +99,15 @@ const help = () => {
                     
                     console.log('[*] Attempting to write encrypted content to file...')
 
+                    // Check if it exists first to warn the user of a file overwrite
+                    if (fs.existsSync(output_fp)) {
+                        let response = ReadInput(`darlene: '${output_fp}' exists, overwrite file? [y/n]: `)
+
+                        if (response == 'n') {
+                            return 0
+                        }
+                    }
+
                     let out_fp = WriteFile(output_fp, blob)
 
                     if (metas.show) {
@@ -120,6 +129,15 @@ const help = () => {
 
                     // We have to rejoin when file we are writing to
                     console.log(`[*] Writing encrypted content to file: '${output_fp + '.' + output_fp_ext}'...`)
+
+                    // Check if it exists first to warn the user of a file overwrite
+                    if (fs.existsSync(output_fp)) {
+                        let response = ReadInput(`darlene: '${output_fp}' exists, overwrite file? [y/n]: `)
+
+                        if (response == 'n') {
+                            return 0
+                        }
+                    }
 
                     let out_fp = WriteFile(output_fp, buff, output_fp_ext)
 
@@ -156,6 +174,15 @@ const help = () => {
                     if (metas.show) {
                         console.log('[+] Recovered:')
                         console.log(`\n${decrypted}\n`)
+                    }
+
+                    // Check if it exists first to warn the user of a file overwrite
+                    if (fs.existsSync(output_fp)) {
+                        let response = ReadInput(`darlene: '${output_fp+'.'+output_fp_ext}' exists, overwrite file? [y/n]: `)
+
+                        if (response == 'n') {
+                            return 0
+                        }
                     }
 
                     let written_out_fp = WriteFile(output_fp + '.' + output_fp_ext, decrypted, output_fp_ext)
@@ -208,6 +235,14 @@ const help = () => {
                                         output_fp + '.' + output_fp_ext + '.' + ext : 
                                         output_fp + '.' + output_fp_ext) 
                                         : StripMerge(output_fp+'.'+output_fp_ext, ext)
+
+                    if (fs.existsSync(file_to_check)) {
+                        let response = ReadInput(`darlene: '${file_to_check}' exists, overwrite file? [y/n]: `)
+
+                        if (response == 'n') {
+                            return 0
+                        }
+                    }
 
                     // Write content
                     let written_out_fp = WriteFile(output_fp+'.'+output_fp_ext, decrypted,  ext, metas.concat)
