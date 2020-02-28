@@ -317,6 +317,8 @@ const buildMeta = (args) => {
                     metas.encrypt = true
                 } else if (obj.arg == 'decrypt') {
                     metas.decrypt = true
+                } else if (obj.arg == 'json') {
+                    metas.isJSON = true
                 } else {
                     // Other metas are updating by direct indexing
                     // ... since the 'arg' is expanded and matches the keys
