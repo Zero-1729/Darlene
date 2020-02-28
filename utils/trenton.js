@@ -254,7 +254,15 @@ const checkSemantics = (metas) => {
     // .. and can't be used with the content (-c) or file (-f) flag
     if ((metas.words > 0) && (metas.content || metas.file)) {
         throw `darlene: -w (or --words) flag cannot be used with the content (-c) or file (-f) flag`
-    }  
+    }
+
+    // Log warning to alert the user of redundant behaviour
+    // If '-w' flag (words) is used with '-J' to encrypt its quite redundant
+    // ... as we already treat is as JSON
+    console.log('e: ', metas.encrypt, 'w: ', metas.words, 'J: ', metas.isJSON)
+    if (metas.encrypt && (metas.words > 0) && metas.isJSON) {
+        console.log('darlene: [warn] input is already encrypted as JSON when -w or --words flag used.')
+    }
 
     // Raw content needs full output path to be specified
     if (metas.content && (path.extname(metas.out)).length == 0) {
