@@ -235,11 +235,6 @@ const checkSemantics = (metas) => {
         throw `darlene: tag must be provided to decrypt data`
     }
 
-    // Check that input file provided when binary and or encrypt flags on
-    /*if ((metas.isBinary || metas.encrypt) && !metas.content && !(metas.words > 0) && (!metas.file)) {
-        throw `darlene: must provide input file path with decrypt flag${metas.isBinary && metas.file ? ' and ' : ''}${metas.isBinary ? 'binary flag' : ''}`
-    }*/
-
     // Check whether non darlene file provided with decrypt op
     if ((metas.decrypt) && (!isDarleneFile(metas.file) && metas.content == null)) {
         throw `darlene: can only decrypt '.drln' files and raw content (see '-c' flag usage)`
@@ -259,7 +254,6 @@ const checkSemantics = (metas) => {
     // Log warning to alert the user of redundant behaviour
     // If '-w' flag (words) is used with '-J' to encrypt its quite redundant
     // ... as we already treat is as JSON
-    console.log('e: ', metas.encrypt, 'w: ', metas.words, 'J: ', metas.isJSON)
     if (metas.encrypt && (metas.words > 0) && metas.isJSON) {
         console.log('darlene: [warn] input is already encrypted as JSON when -w or --words flag used.')
     }

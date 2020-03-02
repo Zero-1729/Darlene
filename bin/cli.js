@@ -119,7 +119,7 @@ const help = () => {
 
                     console.log('[*] Attempting to encrypt content...')
                     let blob = EncryptFlat(key, metas.content, meta)
-                    
+
                     console.log('[*] Attempting to write encrypted content to file...')
 
                     // Check if it exists first to warn the user of a file overwrite
@@ -133,13 +133,13 @@ const help = () => {
 
                     let out_fp = WriteFile(output_fp, blob)
 
-                    if (metas.show) {
-                        let hash = GetMeta(blob).hash
-
-                        console.log('[+] hash: ', hash)
-                    }
-
                     console.log(`[+] Wrote file: '${out_fp}'`)
+
+                    if (metas.show) {
+                        console.log("\n-------BEGIN DARLENE DIGEST")
+                        console.log(GetMeta(blob))
+                        console.log("END DARLENE DIGEST---------")
+                    }
                 } else {
                     // Obtain remaining file info
                     let ifp = SplitFP(metas.file)
@@ -168,6 +168,12 @@ const help = () => {
                     let out_fp = WriteFile(output_fp, buff, output_fp_ext)
 
                     console.log(`[+] Wrote file: '${out_fp}'`)
+
+                    if (metas.show) {
+                        console.log("\n-------BEGIN DARLENE DIGEST")
+                        console.log(GetMeta(ReadFile(out_fp)))
+                        console.log("END DARLENE DIGEST---------")
+                    }
                 }
             } else {
                 // Handle decryption
@@ -230,7 +236,7 @@ const help = () => {
 
                     // Remember 'drln' does not store dot
                     ext = GetExt(file_info.ext)
-                    
+
                     console.log('[*] Determining content type...')
                     // Check if text file from ext
                     // We know it is a text file if its neither binary or is json or 
@@ -245,7 +251,7 @@ const help = () => {
 
                     if (metas.show) {
                         console.log('[+] Recovered:')
-                        console.log("\n", decrypted, "\n")
+                        console.log(`\n${decrypted}\n`)
                     }
 
                     // If concat on, then we pass both exts

@@ -74,7 +74,7 @@ const PrintContent = (data) => {
         // We have a darlene data blob
         let info = GetMeta(data)
 
-        console.log('\nDarlene (Info):\n--------------\n--------------\n')
+        console.log("\n-------BEGIN DARLENE DIGEST")
         console.log("version: ", info.version)
         console.log("mode: ", info.version == 1 ? "cbc" : "gcm")
         console.log("key length: ", info.keylength)
@@ -86,7 +86,7 @@ const PrintContent = (data) => {
         console.log("\ntag (hex): ", info.tag.toString('hex'))
         console.log("\next (ascii): ", isEmptyBuffer(info.ext) ? '-' : info.ext.toString())
 
-        console.log('\n---------------\n---------------\n')
+        console.log("END DARLENE DIGEST---------")
     } else {
         console.log(data)
     }
@@ -199,8 +199,6 @@ const WriteFile = (fp, data, ext='drln', concat=false) => {
     // NOTE: Remember the 'ext' overrides whatever ext 'fp' carries
     // Sanitized output: properly joined fp and ext
     let outfp = StripMerge(fp, ext)
-
-    // console.log('<> ', fp, ext, concat)
 
     // Check of concatenation enabled
     if (concat) {
