@@ -27,6 +27,41 @@ const GetExt = (buff) => {
            buff.replace(/\.*/, '')
 }
 
+const Exists = (fp) => {
+    // returns whether a path exists or not
+    return fs.existsSync(fp)
+}
+
+const isFile = (fp) => {
+    // Detects whether path is file or directory
+    if (Exists(fp)) {
+        return fs.statSync(fp).isFile()
+    }
+
+    return false
+}
+
+const isDirectory = (fp) => {
+    return !isFile(fp) && Exists(fp)
+}
+
+const JoinFP = (path, ext, concat) => {
+    if (ext == '') {
+        return path
+    }
+
+    // concate multiple exts
+    if (concat) {
+        for (var i = 0;i < ext.length;i++) {
+            path += '.' + ext[i]
+        }
+
+        return path
+    }
+
+    return path + '.' + ext
+}
+
 const SplitFP = (fp, single=false) => {
     // strip entire path except file name
     if (single) {
@@ -39,7 +74,7 @@ const SplitFP = (fp, single=false) => {
         return {fp: fp.slice(0, fp.lastIndexOf('.')), ext: path.extname(fp).slice(1)}
     }
 
-    return {fp: fp, ext: 'txt'}
+    return {fp: fp, ext: ''}
 }
 
 const isValidPath = (fp) => {
@@ -57,7 +92,7 @@ const StripMerge = (fp, ext) => {
     }
 
     // No extension file name
-    return  fp + '.' + GetExt(ext)
+    return  JoinFP(fp, GetExt(ext))
 }
 
 
@@ -74,7 +109,7 @@ const PrintContent = (data) => {
         // We have a darlene data blob
         let info = GetMeta(data)
 
-        console.log('\nDarlene (Info):\n--------------\n--------------\n')
+        console.log("\n-------BEGIN DARLENE DIGEST")
         console.log("version: ", info.version)
         console.log("mode: ", info.version == 1 ? "cbc" : "gcm")
         console.log("key length: ", info.keylength)
@@ -86,7 +121,7 @@ const PrintContent = (data) => {
         console.log("\ntag (hex): ", info.tag.toString('hex'))
         console.log("\next (ascii): ", isEmptyBuffer(info.ext) ? '-' : info.ext.toString())
 
-        console.log('\n---------------\n---------------\n')
+        console.log("END DARLENE DIGEST---------")
     } else {
         console.log(data)
     }
@@ -200,12 +235,11 @@ const WriteFile = (fp, data, ext='drln', concat=false) => {
     // Sanitized output: properly joined fp and ext
     let outfp = StripMerge(fp, ext)
 
-    // console.log('<> ', fp, ext, concat)
-
     // Check of concatenation enabled
     if (concat) {
         // We can only concat if extension exists
-        outfp = path.extname(fp).length > 0 ? fp + '.' + ext : outfp
+        // Note: It's assumed the exts were concatenated before hand
+        outfp = fp
     }
 
     fs.writeFileSync(outfp, data)
@@ -214,4 +248,4 @@ const WriteFile = (fp, data, ext='drln', concat=false) => {
     return outfp
 }
 
-module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, SplitFP, StripMerge }
+module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, JoinFP, SplitFP, StripMerge, isDirectory }

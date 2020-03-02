@@ -4,7 +4,7 @@
 
 const path = require('path')
 
-const { isDarleneFile, isValidPath } = require('./file')
+const { isDarleneFile, isValidPath, isDirectory } = require('./file')
 
 // Easily translate some options to metas key
 const meta_aliases = {
@@ -167,11 +167,16 @@ const sanitizeArgs = (args) => {
     return newArgs
 }
 
+const squashNums = (str) => {
+    return str.replace(new RegExp(/[0-9]+/, 'gi'), '')
+              .replace(new RegExp(/ /, 'g'), '')
+}
+
 const isNumber = (str) => {
     let retval = false
 
-    if (str.match(/[0-9]+/)) {
-        retval = str.match(/[0-9]+/).index == 0 ? true : false
+    if (!squashNums(str)) {
+        retval = true
     }
 
     return retval
@@ -219,8 +224,8 @@ const checkSemantics = (metas) => {
     }
 
     // must provide a full path with the words path
-    if ((metas.words > 0) && (!path.extname(metas.out) > 0)) {
-        throw `darlene: file output path must carry a file extension when using the -w (or --words) flag`
+    if ((metas.words > 0) && (path.extname(metas.out) > 0)) {
+        console.log('darlene: file output path extension would be overwritten to json when the -w (or --words) flag')
     }
 
     // Check whether IV provoded in decrypt mode
@@ -234,11 +239,6 @@ const checkSemantics = (metas) => {
     if (metas.tag == null && metas.decrypt && metas.content) {
         throw `darlene: tag must be provided to decrypt data`
     }
-
-    // Check that input file provided when binary and or encrypt flags on
-    /*if ((metas.isBinary || metas.encrypt) && !metas.content && !(metas.words > 0) && (!metas.file)) {
-        throw `darlene: must provide input file path with decrypt flag${metas.isBinary && metas.file ? ' and ' : ''}${metas.isBinary ? 'binary flag' : ''}`
-    }*/
 
     // Check whether non darlene file provided with decrypt op
     if ((metas.decrypt) && (!isDarleneFile(metas.file) && metas.content == null)) {
@@ -254,10 +254,17 @@ const checkSemantics = (metas) => {
     // .. and can't be used with the content (-c) or file (-f) flag
     if ((metas.words > 0) && (metas.content || metas.file)) {
         throw `darlene: -w (or --words) flag cannot be used with the content (-c) or file (-f) flag`
-    }  
+    }
+
+    // Log warning to alert the user of redundant behaviour
+    // If '-w' flag (words) is used with '-J' to encrypt its quite redundant
+    // ... as we already treat is as JSON
+    if (metas.encrypt && (metas.words > 0) && metas.isJSON) {
+        console.log('darlene: [warn] input is already encrypted as JSON when -w or --words flag used.')
+    }
 
     // Raw content needs full output path to be specified
-    if (metas.content && (path.extname(metas.out)).length == 0) {
+    if (metas.content && isDirectory(metas.out)) {
         throw `darlene: must specify a full output (with extension) with -c flag`
     }
 
@@ -271,11 +278,6 @@ const checkSemantics = (metas) => {
     // Check that the input file path is specific
     if (isValidPath(metas.file)) {
         throw `darlene: input file must be more specific than '.'`
-    }
-
-    // Check that output file path is specific
-    if (isValidPath(metas.out)) {
-        throw `darlene: output file must be more specific than '.'`
     }
 }
 
@@ -317,6 +319,8 @@ const buildMeta = (args) => {
                     metas.encrypt = true
                 } else if (obj.arg == 'decrypt') {
                     metas.decrypt = true
+                } else if (obj.arg == 'json') {
+                    metas.isJSON = true
                 } else {
                     // Other metas are updating by direct indexing
                     // ... since the 'arg' is expanded and matches the keys

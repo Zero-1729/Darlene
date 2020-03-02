@@ -1,0 +1,96 @@
+.\" Manpage for darlene.
+.\" Contact Zero-1729@protonmail.com to correct errors or typos.
+.TH man 8 "01 Jan 2020" "0.1.0-b" "dalrene man page"
+.SH NAME
+darlene \- A Symmetric encryption/decryption tool 
+.SH SYNOPSIS
+darlene [-fc] [FILE][STRING] [-o] [FILE] [-DEmkxit] [-JSBh]
+.SH DESCRIPTION
+darlene encrypts/decrypts raw content or files into 'drln' files, and back to the raw content or plain/binary files, respectively.
+.SH EXAMPLES
+
+darlene -c 'Hello, friend' -E -o test --show
+
+darlene -c 'Hello, friend' -E -o test --show
+
+darlene -f ./test.txt -o ./hello -D --show
+
+darlene -f plain.txt -k 192 -o crypted -E
+
+darlene -f crypted.drln -o ~/Documents/decrypted --mode cbc --keylength 128 -D
+
+darlene -f image.png -B -o ~/Pictures/image -x base64 -E
+
+darlene -f server_key.drln -o ~/admin/server_key.pub -C -D
+
+.SH OPTIONS
+
+    -h  --help          -               Print this message.
+    
+                                        Note: should be used without other options.
+    
+    -c  --content       <string>        Specify raw text to encrypt
+    
+                                        Note: specifying output path for file is optional when this flag is used.
+
+    -w  --words         <word count>    Specify the number of words to encrypt
+    
+                                        Note: Only useable with '-E' and '-c' flags
+    
+    -f  --file          <filepath>      Specify file to read from.
+    
+                                        Note: Option required.
+    
+    -o  --out           <filepath>      Specify where to write darlene file.
+    
+                                        Defaults to writing output file in the current directory.
+    
+    -m  --mode          <mode>          Specify the specific AES mode, value is either 'gcm' or 'cbc'.
+    
+                                        Defaults to 'gcm' if this flag not specified.
+    
+    -k  --keylength     <keylength>     Specify the key length, values are '128', '192', '256'.
+    
+                                        Defaults to '256' if this flag not specified.
+    
+    -x  --encoding      <encoding>      Specify the encoding for hash(es), values are either 'hex' or 'base64'.
+    
+                                        Defaults to 'hex' if this flag not specified.
+
+    -i  --iv            <iv>            Specify Initialization vector.
+    
+                                        Required if '-D' flag included.
+
+    -t  --tag           <tag>           Specify Tag.
+    
+                                        Required if '-D' flag included.
+    
+    -E  --encrypt       -               Required flag to indicate whether to encrypt.
+
+    -D  --decrypt       -               Required flag to indicate whether to decrypt.
+
+    -J  --json          -               Flag to indicate content type of plain text.
+    
+                                        Defaults to false when left out.
+    
+    -S  --show          -               Flag to show contents of file written.
+    
+                                        Defaults to false when left out.
+    
+    -B  --binary        -               Flag to indicate the input file is a binary file.
+    
+                                        Defaults to false when left out.
+
+    -C  --concat        -               Flag to indicate whether the 'drln' stored extension in decryption should be concatenated with output file extension.
+    
+                                        Defaults to false.
+
+.SH BUGS
+The file exsension stored in the 'drln' file is the last exsention of the input file.
+
+E.g: key.pub.sec, only the 'sec' extension is stored.
+
+If you wish to add the 'pub' to the decrypted file extension include the -C flag, i.e. 'darlene -f key.drln -o key.pub -D' -> 'key.pub.sec'.
+
+.SH AUTHOR
+Abubakar N K (zero1729@protonmail.com)

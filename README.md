@@ -23,6 +23,8 @@ This allows Darlene preserve the necessary metadata for decrypting the data late
     - [x] Arrays (using JSON)
     - [x] Plain Text & Binary files
 
+> **Note**: Ensure to include the binary flag (`-B`) when working with binary files, usually these are files that display garbage data when opened in a text editor, e.g. '.png', '.pdf', '.docx', '.exe', '.AppImage', etc.
+
 ---
 
 # Install CLI
@@ -74,4 +76,4 @@ sudo npm install -g . --unsafe-perm=true --allow-root
 
 ---
 
-MIT &copy; 2019 (Zero-1729)
+MIT &copy; 2020 (Zero-1729)
