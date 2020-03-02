@@ -264,6 +264,11 @@ const help = () => {
                         console.log(`\n${decrypted}\n`)
                     }
 
+                    // If it was a extless binary file then we exnsure the ext is empty
+                    if (file_info.isBinary && isEmptyBuffer(file_info.ext)) {
+                        ext = ''
+                    }
+
                     // If concat on, then we pass both exts
                     if (!metas.concat) {
                         // Else we override it with the one darlene stored
