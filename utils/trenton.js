@@ -167,11 +167,16 @@ const sanitizeArgs = (args) => {
     return newArgs
 }
 
+const squashNums = (str) => {
+    return str.replace(new RegExp(/[0-9]+/, 'gi'), '')
+              .replace(new RegExp(/ /, 'g'), '')
+}
+
 const isNumber = (str) => {
     let retval = false
 
-    if (str.match(/[0-9]+/)) {
-        retval = str.match(/[0-9]+/).index == 0 ? true : false
+    if (!squashNums(str)) {
+        retval = true
     }
 
     return retval
