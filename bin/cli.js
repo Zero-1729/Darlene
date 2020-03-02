@@ -249,9 +249,8 @@ const help = () => {
 
                     console.log('[*] Determining content type...')
                     // Check if text file from ext
-                    // We know it is a text file if its neither binary or is json or 
-                    // ... ext field left out (default to 'txt')
-                    if (isEmptyBuffer(file_info.ext) || (!file_info.isBinary || file_info.isJSON)) {
+                    // We know it is a text file if its neither binary or is json
+                    if (!file_info.isBinary || file_info.isJSON) {
                         // Stringify text
                         decrypted = file_info.isJSON ? JSON.parse(decrypted) : decrypted.toString()
                     }
@@ -264,7 +263,7 @@ const help = () => {
                         console.log(`\n${decrypted}\n`)
                     }
 
-                    // If it was a extless binary file then we exnsure the ext is empty
+                    // If it was a extless binary file then we ensure the ext is empty
                     if (file_info.isBinary && isEmptyBuffer(file_info.ext)) {
                         ext = ''
                     }
