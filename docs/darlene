@@ -90,7 +90,7 @@ The file exsension stored in the 'drln' file is the last exsention of the input 
 
 E.g: key.pub.sec, only the 'sec' extension is stored.
 
-If you wish to add the 'pub' to the decrypted file extension include the -C flag: i.e. 'darlene -f key.drln -o key.pub -D' would write 'key.pub.sec'.
+If you wish to add the 'pub' to the decrypted file extension include the -C flag, i.e. 'darlene -f key.drln -o key.pub -D' -> 'key.pub.sec'.
 
 .SH AUTHOR
 Abubakar N K (zero1729@protonmail.com)
