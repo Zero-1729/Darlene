@@ -224,8 +224,8 @@ const checkSemantics = (metas) => {
     }
 
     // must provide a full path with the words path
-    if ((metas.words > 0) && (!path.extname(metas.out) > 0)) {
-        throw `darlene: file output path must carry a file extension when using the -w (or --words) flag`
+    if ((metas.words > 0) && (path.extname(metas.out) > 0)) {
+        console.log('darlene: file output path extension would be overwritten to json when the -w (or --words) flag')
     }
 
     // Check whether IV provoded in decrypt mode
