@@ -5,7 +5,7 @@ const fs   = require('fs')
 
 const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
 const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
-const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, SplitFP, StripMerge, GetExt } = require('./../utils/file')
+const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, JoinFP, SplitFP, StripMerge, GetExt, isDirectory } = require('./../utils/file')
 const { ReadInput } = require('./../utils/psswd')
 
 
@@ -91,8 +91,9 @@ const help = () => {
 
                 // Set output file path to input's if folder specified instead
                 // But only if the input path specified
-                if (!path.extname(metas.out)) {
-                    output_fp = path.join(metas.out, SplitFP(metas.file).fp)
+                if (!path.extname(metas.out) && isDirectory(metas.out)) {
+                    // Only grab the filename not entire path
+                    output_fp = path.join(metas.out, SplitFP(metas.file, true).fp)
                     output_fp_ext = GetExt(meta.ext)
                 }
 
@@ -151,13 +152,14 @@ const help = () => {
                     meta.ext = SplitFP(metas.file).ext
 
                     console.log(`[*] Encrypting file contents...`)
-                    let buff = EncryptFileSync(key, ifp.fp + '.' + ifp.ext, meta)
+                    // If the ext is empty so be it
+                    let buff = EncryptFileSync(key, JoinFP(ifp.fp, ifp.ext), meta)
 
                     // We have to rejoin when file we are writing to
-                    console.log(`[*] Writing encrypted content to file: '${output_fp + '.' + output_fp_ext}'...`)
+                    console.log(`[*] Writing encrypted content to file: '${JoinFP(output_fp, output_fp_ext)}'...`)
 
                     // Check if it exists first to warn the user of a file overwrite
-                    if (fs.existsSync(output_fp)) {
+                    if (fs.existsSync(JoinFP(output_fp, output_fp_ext))) {
                         let response = ReadInput(`darlene: '${output_fp}' exists, overwrite file? [y/n]: `)
 
                         if (response == 'n') {
@@ -187,7 +189,7 @@ const help = () => {
 
                 // Set output file path to input's if folder specified instead
                 // But only if the input path specified
-                if (!path.extname(metas.out) && fs.existsSync(metas.out) && metas.file) {
+                if (!path.extname(metas.out) && isDirectory(metas.out)) {
                     output_fp = path.join(metas.out, SplitFP(metas.file, true).fp)
                     output_fp_ext = GetExt(meta.ext)
                 }
@@ -210,14 +212,14 @@ const help = () => {
 
                     // Check if it exists first to warn the user of a file overwrite
                     if (fs.existsSync(output_fp)) {
-                        let response = ReadInput(`darlene: '${output_fp+'.'+output_fp_ext}' exists, overwrite file? [y/n]: `)
+                        let response = ReadInput(`darlene: '${JoinFP(output_fp, output_fp_ext)}' exists, overwrite file? [y/n]: `)
 
                         if (response == 'n') {
                             return 0
                         }
                     }
 
-                    let written_out_fp = WriteFile(output_fp + '.' + output_fp_ext, decrypted, output_fp_ext)
+                    let written_out_fp = WriteFile(JoinFP(output_fp, output_fp_ext), decrypted, output_fp_ext)
                     console.log(`[+] Wrote content to file: ${written_out_fp}`)
                 } else {
                     // Handle (darlene) file decryption
@@ -262,14 +264,11 @@ const help = () => {
                         output_fp_ext = JoinFP(output_fp_ext, [ext], true)
                     }
 
-                    // Check if it exists first to warn the user of a file overwrite
-                    // Basically preemptively perform all checks before hand
-                    let file_to_check = metas.concat ? 
-                                        (path.extname(output_fp+'.'+output_fp_ext).length > 0 ? 
-                                        output_fp + '.' + output_fp_ext + '.' + ext : 
-                                        output_fp + '.' + output_fp_ext) 
-                                        : StripMerge(output_fp+'.'+output_fp_ext, ext)
+                    let file_to_check = JoinFP(output_fp, output_fp_ext)
 
+                    // - All file path manipulations are done at this point -
+
+                    // Check if it exists first to warn the user of a file overwrite
                     if (fs.existsSync(file_to_check)) {
                         let response = ReadInput(`darlene: '${file_to_check}' exists, overwrite file? [y/n]: `)
 
@@ -279,7 +278,7 @@ const help = () => {
                     }
 
                     // Write content
-                    let written_out_fp = WriteFile(output_fp+'.'+output_fp_ext, decrypted,  ext, metas.concat)
+                    let written_out_fp = WriteFile(JoinFP(output_fp, output_fp_ext), decrypted, ext, metas.concat)
                     console.log(`[+] Wrote content to file: '${written_out_fp}'`)
                 }
             }

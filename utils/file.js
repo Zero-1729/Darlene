@@ -27,6 +27,41 @@ const GetExt = (buff) => {
            buff.replace(/\.*/, '')
 }
 
+const Exists = (fp) => {
+    // returns whether a path exists or not
+    return fs.existsSync(fp)
+}
+
+const isFile = (fp) => {
+    // Detects whether path is file or directory
+    if (Exists(fp)) {
+        return fs.statSync(fp).isFile()
+    }
+
+    return false
+}
+
+const isDirectory = (fp) => {
+    return !isFile(fp) && Exists(fp)
+}
+
+const JoinFP = (path, ext, concat) => {
+    if (ext == '') {
+        return path
+    }
+
+    // concate multiple exts
+    if (concat) {
+        for (var i = 0;i < ext.length;i++) {
+            path += '.' + ext[i]
+        }
+
+        return path
+    }
+
+    return path + '.' + ext
+}
+
 const SplitFP = (fp, single=false) => {
     // strip entire path except file name
     if (single) {
@@ -57,7 +92,7 @@ const StripMerge = (fp, ext) => {
     }
 
     // No extension file name
-    return  fp + '.' + GetExt(ext)
+    return  JoinFP(fp, GetExt(ext))
 }
 
 
@@ -213,4 +248,4 @@ const WriteFile = (fp, data, ext='drln', concat=false) => {
     return outfp
 }
 
-module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, SplitFP, StripMerge }
+module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, JoinFP, SplitFP, StripMerge, isDirectory }
