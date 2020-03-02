@@ -4,7 +4,7 @@
 
 const path = require('path')
 
-const { isDarleneFile, isValidPath } = require('./file')
+const { isDarleneFile, isValidPath, isDirectory } = require('./file')
 
 // Easily translate some options to metas key
 const meta_aliases = {
@@ -264,7 +264,7 @@ const checkSemantics = (metas) => {
     }
 
     // Raw content needs full output path to be specified
-    if (metas.content && (path.extname(metas.out)).length == 0) {
+    if (metas.content && isDirectory(metas.out)) {
         throw `darlene: must specify a full output (with extension) with -c flag`
     }
 
