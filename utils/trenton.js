@@ -279,11 +279,6 @@ const checkSemantics = (metas) => {
     if (isValidPath(metas.file)) {
         throw `darlene: input file must be more specific than '.'`
     }
-
-    // Check that output file path is specific
-    if (isValidPath(metas.out)) {
-        throw `darlene: output file must be more specific than '.'`
-    }
 }
 
 const buildMeta = (args) => {
