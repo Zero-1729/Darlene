@@ -144,7 +144,7 @@ const GetAuthTag = (passphrase, iv, cryptedText) => {
 *               mode -> AES mode; defaults to gcm
 *               isJSON -> whether encrypted data is JSON
 *               isBinary -> whether encrypted data is binary content
-*               ext -> file extension. Defaults to 'txt'
+*               ext -> file extension.
 *
 */
 
@@ -174,9 +174,6 @@ const EncryptFlat = (passphrase, data, meta) => {
     // Determine ext
     if (meta.ext) {
         meta.ext[0] == '.' ? meta.ext.slice(1) : meta.ext
-    } else {
-        // Default is text file
-        meta.ext = 'txt'
     }
 
     return CreateData({
@@ -321,9 +318,6 @@ const EncryptFileSync = (passphrase, fp, meta) => {
     // Determine ext
     if (meta.ext) {
         meta.ext[0] == '.' ? meta.ext.slice(1) : meta.ext
-    } else {
-        // Default is text file
-        meta.ext = 'txt'
     }
 
     return CreateData(meta)

@@ -75,6 +75,10 @@ const help = () => {
                 ext: 'txt'
             }
 
+            // Let user defined path ext be used if provided instead of default 'txt'
+            let out_ext = SplitFP(metas.out, true).ext
+            meta.ext = out_ext.length > 0 ? out_ext : meta.ext
+
             // Override ext if words count added
             // ... as we are encrypting an array of words
             if (metas.words > 0) {
@@ -86,8 +90,9 @@ const help = () => {
                 // Gather pieces of the puzzle
                 let ofp = SplitFP(metas.out)
 
+                // Fallback to meta.ext if no ext and fetch ext if present
                 let output_fp = ofp.fp
-                let output_fp_ext = ofp.ext ? GetExt(ofp.ext) : ext
+                let output_fp_ext = ofp.ext ? GetExt(ofp.ext) : meta.ext
 
                 // Set output file path to input's if folder specified instead
                 // But only if the input path specified
@@ -121,6 +126,9 @@ const help = () => {
                     console.log('[*] Attempting to encrypt content...')
                     let blob = EncryptFlat(key, metas.content, meta)
 
+                    // Merge filepath here
+                    output_fp = StripMerge(output_fp, output_fp_ext)
+
                     console.log('[*] Attempting to write encrypted content to file...')
 
                     // Check if it exists first to warn the user of a file overwrite
@@ -148,8 +156,8 @@ const help = () => {
                     console.log(`[*] Checking input file content type...`)
                     // File ext darlene would store
                     // Grab it from input file
-                    // Defaults to 'txt'
-                    meta.ext = SplitFP(metas.file).ext
+                    // Defaults to 'txt' except when input file ext is empty and or its content is binary
+                    meta.ext = (meta.isBinary && (ifp.ext == '')) || ifp.ext ? ifp.ext : 'txt'
 
                     console.log(`[*] Encrypting file contents...`)
                     // If the ext is empty so be it

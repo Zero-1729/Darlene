@@ -74,7 +74,7 @@ const SplitFP = (fp, single=false) => {
         return {fp: fp.slice(0, fp.lastIndexOf('.')), ext: path.extname(fp).slice(1)}
     }
 
-    return {fp: fp, ext: 'txt'}
+    return {fp: fp, ext: ''}
 }
 
 const isValidPath = (fp) => {
