@@ -2,6 +2,7 @@
 
 const path = require('path')
 const fs   = require('fs')
+const cp   = require('child_process')
 
 const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
 const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
@@ -292,6 +293,19 @@ const help = () => {
                     // Write content
                     let written_out_fp = WriteFile(JoinFP(output_fp, output_fp_ext), decrypted, ext, metas.concat)
                     console.log(`[+] Wrote content to file: '${written_out_fp}'`)
+
+                    // Run 'chmod +x' to restore exec permissions
+                    if (file_info.isBinary && isEmptyBuffer(file_info.ext)) {
+                        console.log('[-] Changing file permissions')
+                        if ((process.platform == 'linux') || (process.platform == 'darwin')) {
+                            console.log("[!] Changing file permission requires admin password")
+                            cp.execSync(`sudo chmod +x ${output_fp}`)
+                            console.log('[+] Changed file permissions')
+                        } else {
+                            // Lookup the powershell command equivalent of 'chmod +x'
+                            console.log(`[!] You must give '${output_fp}' exec permissions`)
+                        }
+                    }
                 }
             }
         } catch (e) {
