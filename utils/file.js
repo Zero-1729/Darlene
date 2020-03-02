@@ -203,7 +203,8 @@ const WriteFile = (fp, data, ext='drln', concat=false) => {
     // Check of concatenation enabled
     if (concat) {
         // We can only concat if extension exists
-        outfp = path.extname(fp).length > 0 ? fp + '.' + ext : outfp
+        // Note: It's assumed the exts were concatenated before hand
+        outfp = fp
     }
 
     fs.writeFileSync(outfp, data)

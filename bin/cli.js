@@ -258,6 +258,8 @@ const help = () => {
                     if (!metas.concat) {
                         // Else we override it with the one darlene stored
                         output_fp_ext = ext
+                    } else {
+                        output_fp_ext = JoinFP(output_fp_ext, [ext], true)
                     }
 
                     // Check if it exists first to warn the user of a file overwrite
