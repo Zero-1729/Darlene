@@ -9,6 +9,7 @@ const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('
 const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, JoinFP, SplitFP, StripMerge, GetExt, isDirectory } = require('./../utils/file')
 const { ReadInput } = require('./../utils/psswd')
 
+const VERSION = "0.4.2"
 
 console.log('-------------')
 console.log('Darlene CLI')
@@ -51,6 +52,8 @@ const help = () => {
     // If no args provided or the help flag is included we print the help message
     if (args.length == 0 || args.includes('-h') || args.includes('--help')) {
         help()
+    } else if ((args.length > 0) && (args.includes('-v') || args.includes('--version'))) {
+        console.log(`darlene v${VERSION}\n`)
     } else {
         try {
             // Meta needed by Darlene
