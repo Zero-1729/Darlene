@@ -9,7 +9,7 @@ const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('
 const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, JoinFP, SplitFP, StripMerge, GetExt, isDirectory } = require('./../utils/file')
 const { ReadInput } = require('./../utils/psswd')
 
-const VERSION = "0.4.3"
+const VERSION = "0.5.0"
 
 console.log('-------------')
 console.log('Darlene CLI')
@@ -24,6 +24,7 @@ const help = () => {
     console.log("-m  --mode\t\targs: <mode> \t\tSpecify the specific AES mode, value is either 'gcm' or 'cbc'.\n\n\t\t\tDefaults to 'gcm' if this flag not specified.\n\n")
     console.log("-k  --keylength\t\targs: <keylength> \t\tSpecify the key length, values are '128', '192', '256'.\n\n\t\t\tDefaults to '256' if this flag not specified.\n\n")
     console.log("-x  --encoding\t\targs: <encoding> \t\tSpecify the encoding for hash(es), values are either 'hex' or 'base64'.\n\n\t\t\tDefaults to 'hex' if this flag not specified.\n\n")
+    console.log("-X  --exec\t\targs: - \t\tSpecify whether to add exec (+x) perms to decrypted binary file.\n\n\t\t\tDefaults to 'false' when not specified.\n\n")
     console.log("-i  --iv\t\targs: <iv> \t\tSpecify Initialization vector.\n\n\t\t\tRequired if '-D' flag included.\n\n")
     console.log("-t  --tag\t\targs: <tag> \t\tSpecify Tag.\n\n\t\t\tRequired if '-D' flag included.\n\n")
     console.log("-w  --words\t\targs: <word count> \t\tSpecify the number of words to encrypt\n\n\t\tOnly useable with '-E' and '-c' flags\n\n")
@@ -42,6 +43,7 @@ const help = () => {
     console.log("\tdarlene -f crypted.drln -o ~/Documents/decrypted --mode cbc --keylength 128 -D")
     console.log("\tdarlene -f image.png -B -o ~/Pictures/image -x base64 -E\n")
     console.log("\tdarlene -f server_key.drln -o ~/admin/server_key.pub -C -D\n")
+    console.log("\tdarlene -f prog.drln -o /usr/local/bin/ -D -X")
 }
 
 // Our synthetic main fn
@@ -298,7 +300,7 @@ const help = () => {
                     console.log(`[+] Wrote content to file: '${written_out_fp}'`)
 
                     // Run 'chmod +x' to restore exec permissions
-                    if (file_info.isBinary && isEmptyBuffer(file_info.ext)) {
+                    if (file_info.isBinary && isEmptyBuffer(file_info.ext) && metas.exec) {
                         console.log('[-] Changing file permissions')
                         if ((process.platform == 'linux') || (process.platform == 'darwin')) {
                             console.log("[!] Changing file permission requires admin password")

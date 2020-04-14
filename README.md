@@ -25,6 +25,8 @@ This allows Darlene preserve the necessary metadata for decrypting the data late
 
 > **Note**: Ensure to include the binary flag (`-B`) when working with binary files, usually these are files that display garbage data when opened in a text editor, e.g. '.png', '.pdf', '.docx', '.exe', '.AppImage', etc.
 
+> **Caution**: If you are decrypting binary content that requires exec (`+x`) permissions then include the `-X` or `--exec` flag. You could also use the flag if you aren't sure whether the binary content being decrypted would require exec (`+x`) permissions.
+
 ---
 
 # Install CLI
@@ -76,4 +78,4 @@ sudo npm install -g . --unsafe-perm=true --allow-root
 
 ---
 
-MIT &copy; 2020 (Zero-1729)
+MIT &copy; 2019-present (Zero-1729)
