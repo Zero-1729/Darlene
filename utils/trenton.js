@@ -12,6 +12,7 @@ const meta_aliases = {
     'm': 'mode',
     'k': 'keylength',
     'x': 'encoding',
+    'X': 'exec',
     'c': 'content',
     'C': 'concat',
     'f': 'file',
@@ -48,6 +49,8 @@ const valid_args = [ '-h',
                     '--keylength',
                     '-x',
                     '--encoding',
+                    '-X',
+                    '--exec',
                     '-i',
                     '--iv',
                     '-t',
@@ -66,7 +69,7 @@ const valid_args = [ '-h',
                     '--show' ]
 
 // Our single character flags and their expanded versions
-const flags = ['C', 'concat', 'B', 'binary', 'E', 'encrypt', 'D', 'decrypt', 'J', 'json', 'S', 'show']
+const flags = ['C', 'concat', 'B', 'binary', 'E', 'encrypt', 'D', 'decrypt', 'J', 'json', 'S', 'show', 'X', 'exec']
 
 const joinArray = (arr) => {
     // Function returns a stringified array in the form '<elm>, <elm>, ... or <elm>'
@@ -250,6 +253,11 @@ const checkSemantics = (metas) => {
         throw `darlene: cannot use both binary (-B) and json (-J) flag.`
     }
 
+    // Check whether '-X' provided with decrypt flag for file
+    if (metas.exec && !(metas.decrypt && metas.file)) {
+        throw `darlene: can only use exec (-X) flag in file decryption.`
+    }
+
     // Check that the words (-w) flag in the encryption mode (-E)
     // .. and can't be used with the content (-c) or file (-f) flag
     if ((metas.words > 0) && (metas.content || metas.file)) {
@@ -290,6 +298,7 @@ const buildMeta = (args) => {
         iv: null,
         isJSON: false,
         isBinary: false,
+        exec: false,
         file: null,
         out: null,
         content: null,
@@ -315,12 +324,14 @@ const buildMeta = (args) => {
                 // ... this way, Darlene can handle the file contents properly when encrypting/decryprting
                 if (obj.arg == 'binary') {
                     metas.isBinary = true
+                } else if (obj.arg == 'exec') {
+                    metas.exec     = true
                 } else if (obj.arg == 'encrypt') {
-                    metas.encrypt = true
+                    metas.encrypt  = true
                 } else if (obj.arg == 'decrypt') {
-                    metas.decrypt = true
+                    metas.decrypt  = true
                 } else if (obj.arg == 'json') {
-                    metas.isJSON = true
+                    metas.isJSON   = true
                 } else {
                     // Other metas are updating by direct indexing
                     // ... since the 'arg' is expanded and matches the keys
