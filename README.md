@@ -35,7 +35,7 @@ This allows Darlene preserve the necessary metadata for decrypting the data late
 npm install -g darlene
 
 # Note: If you get an 'EACCES' error run the command below instead
-sudo npm install -g . --unsafe-perm=true --allow-root
+sudo npm install -g darlene --unsafe-perm=true --allow-root
 ```
 
 ## Locally
@@ -62,7 +62,7 @@ sudo npm install -g . --unsafe-perm=true --allow-root
 npm uninstall -g darlene
 
 # Note: If you get an 'EACCES' error run the command below instead
-sudo npm install -g . --unsafe-perm=true --allow-root
+sudo npm install -g darlene --unsafe-perm=true --allow-root
 ```
 
 ## Locally
