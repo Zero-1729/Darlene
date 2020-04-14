@@ -298,7 +298,7 @@ const help = () => {
                     console.log(`[+] Wrote content to file: '${written_out_fp}'`)
 
                     // Run 'chmod +x' to restore exec permissions
-                    if (file_info.isBinary && isEmptyBuffer(file_info.ext)) {
+                    if (file_info.isBinary && isEmptyBuffer(file_info.ext) && metas.exec) {
                         console.log('[-] Changing file permissions')
                         if ((process.platform == 'linux') || (process.platform == 'darwin')) {
                             console.log("[!] Changing file permission requires admin password")
