@@ -24,6 +24,7 @@ const help = () => {
     console.log("-m  --mode\t\targs: <mode> \t\tSpecify the specific AES mode, value is either 'gcm' or 'cbc'.\n\n\t\t\tDefaults to 'gcm' if this flag not specified.\n\n")
     console.log("-k  --keylength\t\targs: <keylength> \t\tSpecify the key length, values are '128', '192', '256'.\n\n\t\t\tDefaults to '256' if this flag not specified.\n\n")
     console.log("-x  --encoding\t\targs: <encoding> \t\tSpecify the encoding for hash(es), values are either 'hex' or 'base64'.\n\n\t\t\tDefaults to 'hex' if this flag not specified.\n\n")
+    console.log("-X  --exec\t\targs: - \t\tSpecify whether to add exec (+x) perms to decrypted binary file.\n\n\t\t\tDefaults to 'false' when not specified.\n\n")
     console.log("-i  --iv\t\targs: <iv> \t\tSpecify Initialization vector.\n\n\t\t\tRequired if '-D' flag included.\n\n")
     console.log("-t  --tag\t\targs: <tag> \t\tSpecify Tag.\n\n\t\t\tRequired if '-D' flag included.\n\n")
     console.log("-w  --words\t\targs: <word count> \t\tSpecify the number of words to encrypt\n\n\t\tOnly useable with '-E' and '-c' flags\n\n")
