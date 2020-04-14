@@ -43,6 +43,7 @@ const help = () => {
     console.log("\tdarlene -f crypted.drln -o ~/Documents/decrypted --mode cbc --keylength 128 -D")
     console.log("\tdarlene -f image.png -B -o ~/Pictures/image -x base64 -E\n")
     console.log("\tdarlene -f server_key.drln -o ~/admin/server_key.pub -C -D\n")
+    console.log("\tdarlene -f prog.drln -o /usr/local/bin/ -D -X")
 }
 
 // Our synthetic main fn
