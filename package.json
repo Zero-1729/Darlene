@@ -1,6 +1,6 @@
 {
   "name": "darlene",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A Symmetric Encryption Tool.",
   "main": "bin/cli.js",
   "bin": {
