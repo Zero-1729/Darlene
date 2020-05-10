@@ -403,8 +403,7 @@ const DecryptFileSync = (passphrase, fp) => {
             // Writing file should be handled externally
             return {plain: decrypted, metas: meta}
         } catch (e) {
-            console.log(e)
-            throw '[AuthError] Bad or Forged tag detected!'
+            throw '[AuthError] Wrong passphrase entered: bad or forged tag detected!'
         }
     }
 }
