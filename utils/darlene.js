@@ -2,7 +2,6 @@ const { HexToBuffer } = require('./hex')
 const { CreateData, GetMeta, ReadFile } = require('./file')
 const { AbbvEnconding, ExpandEncoding } = require('./encoding')
 
-const fs = require('fs')
 const crypto = require('crypto')
 
 /*
@@ -287,13 +286,7 @@ const DecryptFlat = (passphrase, data) => {
 */
 
 const EncryptFileSync = (passphrase, fp, meta) => {
-    let buff
-
-    try {
-        buff = fs.readFileSync(fp)
-    } catch (e) {
-        throw `[FileError] ${e.message.split(':')[1]}`
-    }
+    let buff = ReadFile(fp)
 
     // create cipher
     let iv = crypto.randomBytes(16)
