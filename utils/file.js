@@ -225,8 +225,16 @@ const ReadFile = (fp, print=true) => {
 
         return content
     } catch (e) {
-        // File does not exist
-        throw `[FileError] ${e.message.split(':')[1]}`
+        let [code, msg] = e.message.split(':')
+
+        // File does not exist or attempt to read directory
+        if (code == 'ENOENT') {
+            msg = `File or directory '${fp}' does not exist.`
+        } else if (code == 'EISDIR') {
+            msg = `Cannot read directory '${fp}'.`
+        }
+
+        throw `[FileError] ${msg}`
     }
 }
 
