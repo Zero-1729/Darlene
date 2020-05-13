@@ -29,6 +29,12 @@ This allows Darlene preserve the necessary metadata for decrypting the data late
 
 ---
 
+# Upgrading from version 0.6.x
+
+After the `v0.6.0` release, the [drln file structure](./docs/darlene_file_format.md) was changed to make reading the drln data easier and also make discovery of drln files easier, as they now begin with the 4 Byte magic number '`44 4E 17 29`'.
+
+If you are trying to decrypt an older drln file created by `darlene` v0.5.x or older, include the `-legacy` or `-L` flag.
+
 # Install CLI
 
 ## NPM
