@@ -79,6 +79,7 @@ const help = () => {
                 encoding: metas.encoding,
                 isJSON: metas.isJSON,
                 isBinary: metas.isBinary,
+                legacy: metas.legacy,
                 ext: 'txt'
             }
 
