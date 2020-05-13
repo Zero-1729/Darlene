@@ -9,6 +9,7 @@ const { isDarleneFile, isValidPath, isDirectory } = require('./file')
 // Easily translate some options to metas key
 const meta_aliases = {
     'J': 'isJSON',
+    'L': 'legacy',
     'm': 'mode',
     'k': 'keylength',
     'x': 'encoding',
@@ -65,11 +66,13 @@ const valid_args = [ '-h',
                     '--binary',
                     '-J',
                     '--json',
+                    '-L',
+                    '--legacy',
                     '-S',
                     '--show' ]
 
 // Our single character flags and their expanded versions
-const flags = ['C', 'concat', 'B', 'binary', 'E', 'encrypt', 'D', 'decrypt', 'J', 'json', 'S', 'show', 'X', 'exec']
+const flags = ['C', 'concat', 'B', 'binary', 'E', 'encrypt', 'D', 'decrypt', 'J', 'json', 'L', 'legacy', 'S', 'show', 'X', 'exec']
 
 const joinArray = (arr) => {
     // Function returns a stringified array in the form '<elm>, <elm>, ... or <elm>'
@@ -253,6 +256,11 @@ const checkSemantics = (metas) => {
         throw `darlene: cannot use both binary (-B) and json (-J) flag.`
     }
 
+    // Check that legacy flag only used with decrypt flag
+    if (!(metas.legacy && metas.decrypt)) {
+        throw `darlene: cannot use legacy (-L) flag without decrypt flag (-D).`
+    }
+
     // Check whether '-X' provided with decrypt flag for file
     if (metas.exec && !(metas.decrypt && metas.file)) {
         throw `darlene: can only use exec (-X) flag in file decryption.`
@@ -304,6 +312,7 @@ const buildMeta = (args) => {
         content: null,
         words: 0, // Actual count of words to encrypt, for wallet mnemonics and such
         concat: false,
+        legacy: false,
         show: false,
         encrypt: false,
         decrypt: false
@@ -332,6 +341,8 @@ const buildMeta = (args) => {
                     metas.decrypt  = true
                 } else if (obj.arg == 'json') {
                     metas.isJSON   = true
+                } else if (obj.arg == ) {
+                    metas.legacy   = true
                 } else {
                     // Other metas are updating by direct indexing
                     // ... since the 'arg' is expanded and matches the keys
