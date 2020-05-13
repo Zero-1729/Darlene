@@ -127,7 +127,69 @@ const PrintContent = (data) => {
     }
 }
 
-const CreateData = (meta) => {
+// New format drln file creator
+const CreateNewData = (meta) => {
+    /// Total Tip: 4 Bytes
+    // Tip: Magic number (4 B)
+    let hexed_string = '444E1729' // Start with the magic number
+
+    /// Header total: 42 - 56 Bytes
+    // Header (1/6): File version byte (1 B)
+    hexed_string += meta.mode == 'cbc' ? '01' : '02'
+
+    // Header (2/6): AES key length (1 B)
+    hexed_string += keylengths[meta.keylength]
+
+    // Header (3/6): Data encoding (3 B)
+    let tmp_buff = Buffer.alloc(3)
+    let zipped_encoding = AbbvEnconding(meta.encoding)
+    tmp_buff.asciiWrite(zipped_encoding)
+    hexed_string += tmp_buff.toString('hex')
+
+    // Header (4/6): Encrypted data IV (16 B)
+    if (Buffer.isBuffer(meta.iv)) {
+        hexed_string += meta.iv.toString('hex')
+    } else {
+        // Assuming it is in the form '0x...'
+        hexed_string += meta.iv.slice(0, 2) == '0x' ? meta.iv.slice(2) : meta.iv
+    }
+
+    // Header (5/6): AES Tag details (16 - 32 B)
+    if (Buffer.isBuffer(meta.tag)) {
+        hexed_string += meta.tag.toString('hex')
+    } else {
+        hexed_string += meta.tag
+    }
+
+    // Header (6/6): Data File extention tag (5 B)
+    if (meta.ext) {
+        tmp_buff = Buffer.alloc(5)
+        tmp_buff.asciiWrite(meta.ext)
+        hexed_string += tmp_buff.toString('hex')
+    } else {
+        hexed_string += '0000000000'
+    }
+
+    /// Body total: 1 Byte + variable Bytes
+    // Body (1/2): Content type flag (1 B)
+    if (meta.isBinary) {
+        hexed_string += '02'
+    } else if (meta.isJSON) {
+        hexed_string += '01'
+    } else {
+        // Plain text 
+        hexed_string += '00'
+    }
+
+    // Body (2/2): Encrypted content
+    hexed_string += MakeBuffer(meta.hash, meta.encoding).toString('hex')
+
+    // translate all data into buffer
+    return Buffer.from(hexed_string, 'hex')
+}
+
+// Older format drln file creator
+const CreateLegacyData = (meta) => {
     let hexed_string = ''
 
     // We fill in the 'hexed_string' one piece of info at a time
@@ -256,4 +318,4 @@ const WriteFile = (fp, data, ext='drln', concat=false) => {
     return outfp
 }
 
-module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, JoinFP, SplitFP, StripMerge, isDirectory }
+module.exports = { ReadFile, WriteFile, CreateNewData, CreateLegacyData, GetMeta, PrintContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, JoinFP, SplitFP, StripMerge, isDirectory }
