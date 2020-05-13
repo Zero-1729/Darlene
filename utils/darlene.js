@@ -1,5 +1,5 @@
 const { HexToBuffer } = require('./hex')
-const { CreateData, GetMeta, ReadFile } = require('./file')
+const { CreateNewData, CreateLegacyData, GetMeta, ReadFile } = require('./file')
 const { AbbvEnconding, ExpandEncoding } = require('./encoding')
 
 const crypto = require('crypto')
@@ -175,7 +175,17 @@ const EncryptFlat = (passphrase, data, meta) => {
         meta.ext[0] == '.' ? meta.ext.slice(1) : meta.ext
     }
 
-    return CreateData({
+    return meta.legacy ? CreateLegacyData({
+        mode: meta.mode,
+        iv: iv,
+        keylength: meta.keylength,
+        encoding: AbbvEnconding(meta.encoding),
+        tag: tag,
+        hash: content,
+        isJSON: meta.isJSON,
+        isBinary: meta.isBinary,
+        ext: meta.ext
+    }) : CreateNewData({
         mode: meta.mode,
         iv: iv,
         keylength: meta.keylength,
@@ -313,7 +323,7 @@ const EncryptFileSync = (passphrase, fp, meta) => {
         meta.ext[0] == '.' ? meta.ext.slice(1) : meta.ext
     }
 
-    return CreateData(meta)
+    return meta.legacy ? CreateLegacyData(meta) : CreateNewData(meta)
 }
 
 
