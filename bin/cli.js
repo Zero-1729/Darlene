@@ -31,6 +31,7 @@ const help = () => {
     console.log("-E  --encrypt\t\targs: - \t\tRequired flag to indicate whether to encrypt.\n\n")
     console.log("-D  --decrypt\t\targs: - \t\tRequired flag to indicate whether to decrypt.\n\n")
     console.log("-J  --json\t\targs: - \t\tFlag to indicate content type of plain text.\n\n\t\t\tDefaults to false.\n\n")
+    console.log("-L  --legacy\t\targs: - \t\tFlag to indicate whether to decrypt older drln files created with v0.5.x or older.\n\n")
     console.log("-S  --show\t\targs: - \t\tFlag to show contents of file written.\n\n\t\t\tDefaults to false.")
     console.log("-B  --binary\t\targs: - \t\tFlag to indicate the input file is a binary file.\n\n\t\t\tDefaults to false.")
     console.log("-C  --concat\t\targs: - \t\tFlag to indicate whether 'drln' extension in decryption should be concatenated with output file extension.\n\n\t\tDefaults to false.")
