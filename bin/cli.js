@@ -6,7 +6,7 @@ const cp   = require('child_process')
 
 const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
 const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
-const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, JoinFP, SplitFP, StripMerge, GetExt, isDirectory } = require('./../utils/file')
+const { ReadFile, WriteFile, GetMeta, GetLegacyMeta, PrintContent, isEmptyBuffer, isDarleneFile, JoinFP, SplitFP, StripMerge, GetExt, isDirectory } = require('./../utils/file')
 const { ReadInput } = require('./../utils/psswd')
 
 const VERSION = "0.5.2"
@@ -153,9 +153,7 @@ const help = () => {
                     console.log(`[+] Wrote file: '${out_fp}'`)
 
                     if (metas.show) {
-                        console.log("\n-------BEGIN DARLENE DIGEST")
-                        console.log(GetMeta(blob))
-                        console.log("END DARLENE DIGEST---------")
+                        PrintContent(blob)
                     }
                 } else {
                     // Obtain remaining file info
@@ -188,9 +186,7 @@ const help = () => {
                     console.log(`[+] Wrote file: '${out_fp}'`)
 
                     if (metas.show) {
-                        console.log("\n-------BEGIN DARLENE DIGEST")
-                        console.log(GetMeta(ReadFile(out_fp)))
-                        console.log("END DARLENE DIGEST---------")
+                        PrintContent(ReadFile(out_fp))
                     }
                 }
             } else {
@@ -219,7 +215,7 @@ const help = () => {
                     meta.hash = metas.content
 
                     console.log('[*] Attempting to decrypt content...')
-                    decrypted = DecryptFlat(key, meta)
+                    decrypted = DecryptFlat(key, meta, meta.legacy)
 
                     if (metas.show) {
                         console.log('[+] Recovered:')
@@ -246,11 +242,11 @@ const help = () => {
                     let blob = ReadFile(raw_input_fp)
 
                     console.log('[*] Attempting to decrypt content...')
-                    decrypted = DecryptFileSync(key, raw_input_fp).plain
+                    decrypted = DecryptFileSync(key, raw_input_fp, meta.legacy).plain
 
                     // Extract new file content
                     console.log('[*] Extracting encrypted file extension...')
-                    let file_info = GetMeta(blob)
+                    let file_info = meta.legacy ? GetLegacyMeta(blob) : GetMeta(blob)
 
                     // Remember 'drln' does not store dot
                     ext = GetExt(file_info.ext)
