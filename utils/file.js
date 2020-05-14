@@ -247,6 +247,14 @@ const CreateLegacyData = (meta) => {
 
 const GetMeta = (buff) => {
     let version = buff[0]
+
+    // Best possible check for validity of drln file
+    // If the suspected drln file has a version outside the recognized 
+    // ... versions range then it is probavly not a genuine darlene file
+    if (!(version >= 0x01 && version <= 0x02)) {
+        throw `darlene: Darlene file does not have a valid version number.`
+    }
+
     let keylength = buff[1] + 1
     let encoding = ExpandEncoding(buff.slice(2, 5).toString('utf8'))
     let iv = buff.slice(5, 21)
