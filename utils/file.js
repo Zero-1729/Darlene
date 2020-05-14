@@ -153,7 +153,7 @@ const PrintLegacyContent = (data) => {
 }
 
 // New format drln file creator
-const CreateNewData = (meta) => {
+const CreateData = (meta) => {
     /// Total Tip: 4 Bytes
     // Tip: Magic number (4 B)
     let hexed_string = '444E1729' // Start with the magic number
