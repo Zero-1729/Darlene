@@ -110,16 +110,41 @@ const PrintContent = (data) => {
         let info = GetMeta(data)
 
         console.log("\n-------BEGIN DARLENE DIGEST")
-        console.log("version: ", info.version)
-        console.log("mode: ", info.version == 1 ? "cbc" : "gcm")
-        console.log("key length: ", info.keylength)
-        console.log("encoding: ", info.encoding)
-        console.log("\nBinary: ", info.isBinary)
-        console.log("\nJSON: ", !info.isJSON)
-        console.log("\niv (hex): ", info.iv.toString('hex'))
+        console.log("\n[Tip]")
+        console.log(`\tMagic Number: ${info.magic_num}`)
+        console.log("\n[Header]")
+        console.log(`\n\t(file) version: ${info.version}`)
+        console.log(`\t(AES) Mode: ${info.version == 1 ? "cbc" : "gcm"}`)
+        console.log(`\t(AES) key length: ${info.keylength}`)
+        console.log(`\tIV (hex): ${info.iv.toString('hex')}`)
+        console.log(`\tTag (hex): ${info.tag.toString('hex')}`)
+        console.log(`\t(file) encoding: ${info.encoding}`)
+        console.log(`\t(file) Ext (ascii): ${isEmptyBuffer(info.ext) ? '-' : info.ext.toString()}`)
 
-        console.log("\ntag (hex): ", info.tag.toString('hex'))
-        console.log("\next (ascii): ", isEmptyBuffer(info.ext) ? '-' : info.ext.toString())
+        console.log("\n[misc]")
+        console.log(`\n\tEncrypted Content Type: ${info.isBinary ? 'Binary' : (info.isJSON ? 'JSON' : 'Plain Text')}\n`)
+        console.log("END DARLENE DIGEST---------")
+    } else {
+        console.log(data)
+    }
+}
+
+const PrintLegacyContent = (data) => {
+    if (Buffer.isBuffer(data)) {
+        // We have a darlene data blob
+        let info = GetLegacyMeta(data)
+
+        console.log("\n-------BEGIN DARLENE DIGEST")
+        console.log(`\n(File) Version: ${info.version}`)
+        console.log(`(AES) Mode: ${info.version == 1 ? "cbc" : "gcm"}`)
+        console.log(`(AES) Key length: ${info.keylength}`)
+        console.log(`(File) Encoding: ${info.encoding}`)
+        console.log(`IV (hex): ${info.iv.toString('hex')}`)
+
+        console.log(`\nEncrypted Content Type: ${info.isBinary ? 'Binary' : (info.isJSON ? 'JSON' : 'Plain Text')}`)
+
+        console.log(`\nTag (hex): ${info.tag.toString('hex')}`)
+        console.log(`(File) Ext (ascii): ${isEmptyBuffer(info.ext) ? '-' : info.ext.toString()}\n`)
 
         console.log("END DARLENE DIGEST---------")
     } else {
