@@ -165,13 +165,7 @@ const CreateData = (meta) => {
     // Header (2/6): AES key length (1 B)
     hexed_string += keylengths[meta.keylength]
 
-    // Header (3/6): Data encoding (3 B)
-    let tmp_buff = Buffer.alloc(3)
-    let zipped_encoding = AbbvEnconding(meta.encoding)
-    tmp_buff.asciiWrite(zipped_encoding)
-    hexed_string += tmp_buff.toString('hex')
-
-    // Header (4/6): Encrypted data IV (16 B)
+    // Header (3/6): Encrypted data IV (16 B)
     if (Buffer.isBuffer(meta.iv)) {
         hexed_string += meta.iv.toString('hex')
     } else {
@@ -179,12 +173,18 @@ const CreateData = (meta) => {
         hexed_string += meta.iv.slice(0, 2) == '0x' ? meta.iv.slice(2) : meta.iv
     }
 
-    // Header (5/6): AES Tag details (16 - 32 B)
+    // Header (4/6): AES Tag details (16 - 32 B)
     if (Buffer.isBuffer(meta.tag)) {
         hexed_string += meta.tag.toString('hex')
     } else {
         hexed_string += meta.tag
     }
+
+    // Header (5/6): Data encoding (3 B)
+    let tmp_buff = Buffer.alloc(3)
+    let zipped_encoding = AbbvEnconding(meta.encoding)
+    tmp_buff.asciiWrite(zipped_encoding)
+    hexed_string += tmp_buff.toString('hex')
 
     // Header (6/6): Data File extention tag (5 B)
     if (meta.ext) {
@@ -280,14 +280,17 @@ const GetMeta = (buff) => {
     if (magic_num.toString('hex') == '444e1729') {
         let file_ver = buff[0]
         let keylength = buff[1] + 1
-        let encoding = ExpandEncoding(buff.slice(2, 5).toString('utf8'))
-        let iv = buff.slice(5, 21)
+        let iv = buff.slice(2, 18)
 
         let tag_type = file_ver == 1 ? 'extended' : 'compressed'
         let multiplier = tag_type == 'extended' ? 32 : 16
 
-        let tag = buff.slice(21, 21 + multiplier)
-        let file_ext = buff.slice(21 + multiplier, 21 + multiplier + 6)
+        let tag = buff.slice(18, 18 + multiplier)
+
+        let tag_lim = 18 + multiplier
+
+        let encoding = ExpandEncoding(buff.slice(tag_lim, tag_lim + 3).toString('utf8'))
+        let file_ext = buff.slice(tag_lim + 3, tag_lim + 3 + 6)
 
         let contentFlag = buff[multiplier == 32 ? 58 : 42]
 
