@@ -35,6 +35,8 @@ After the `v0.6.0` release, the [drln file structure](./docs/darlene_file_format
 
 If you are trying to decrypt an older drln file created by `darlene` v0.5.x or older, include the `-legacy` or `-L` flag.
 
+**Note**: If you are not sure whether a drln file is a legacy drln file, try decrypting normally (i.e. `$ darlene -f [drln file] -o [output file] -D ...`), if you get the following error: "`Darlene file contains an invalid magic number.`", then it is highly likely that the drln file is a legacy file as legacy files had no magic number, which means you should include the legacy flag (`-L` or `--legacy`). Additionally, if after adding the legacy flag you get the following error: "`darlene: Darlene file does not have a valid version number.`", then it is likely that the file is not a drln file.
+
 # Install CLI
 
 ## NPM
