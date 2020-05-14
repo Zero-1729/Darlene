@@ -341,7 +341,7 @@ const buildMeta = (args) => {
                     metas.decrypt  = true
                 } else if (obj.arg == 'json') {
                     metas.isJSON   = true
-                } else if (obj.arg == ) {
+                } else if (obj.arg == 'legacy') {
                     metas.legacy   = true
                 } else {
                     // Other metas are updating by direct indexing
