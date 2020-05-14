@@ -246,6 +246,47 @@ const CreateLegacyData = (meta) => {
 }
 
 const GetMeta = (buff) => {
+    let magic_num = buff.slice(0, 4)
+
+    // Cut data
+    buff = buff.slice(4)
+
+    // Only continue to read data if the magic number matches
+    if (magic_num.toString('hex') == '444e1729') {
+        let file_ver = buff[0]
+        let keylength = buff[1] + 1
+        let encoding = ExpandEncoding(buff.slice(2, 5).toString('utf8'))
+        let iv = buff.slice(5, 21)
+
+        let tag_type = file_ver == 1 ? 'extended' : 'compressed'
+        let multiplier = tag_type == 'extended' ? 32 : 16
+
+        let tag = buff.slice(21, 21 + multiplier)
+        let file_ext = buff.slice(21 + multiplier, 21 + multiplier + 6)
+
+        let contentFlag = buff[multiplier == 32 ? 58 : 42]
+
+        let content = buff.slice(multiplier == 32 ? 58 + 1 : 42 + 1)
+
+        return {
+            magic_num: magic_num.toString('hex'),
+            version: file_ver,
+            mode: file_ver == 1 ? 'cbc' : 'gcm',
+            keylength: keylength,
+            encoding: encoding,
+            iv: iv,
+            isBinary: contentFlag == 2,
+            isJSON: contentFlag == 1,
+            hash: content,
+            tag: tag,
+            ext: file_ext
+        }
+    } else { 
+        throw `darlene: Darlene file contains an invalid magic number.`
+    }
+}
+
+const GetLegacyMeta = (buff) => {
     let version = buff[0]
 
     // Best possible check for validity of drln file
