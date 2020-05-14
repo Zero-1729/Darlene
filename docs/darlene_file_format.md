@@ -19,7 +19,7 @@ A darlene file is a binary file that contains the following information
 
 **Note**: After version 0.6.x, the drln file structure was changed to the sturtuce below to make reading the data easier. If you are reading  fdrln files created by older versions of `darlene` (v0.5.x or older) scroll down to the [legacy format](###Legacy\ format) section.
 
-### New format
+### Current format
 
 **Note**: This is the structure used by `darlene` version 0.6.x or newer.
 

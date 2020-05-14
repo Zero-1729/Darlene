@@ -6,9 +6,7 @@ A Symmetric Encryption Tool.
 
 ---
 
-**Note**: When Darlene encrypts some piece of data, be it a text/binary file, array, string/JSON or Buffer, it outputs a [darlene](./docs/darlene_file_format.md) file. 
-
-This allows Darlene preserve the necessary metadata for decrypting the data later on.
+**Note**: When Darlene encrypts data, be it a text/binary file, array, string/JSON or Buffer, she outputs a [darlene](./docs/darlene_file_format.md) (drln) file, which allows Darlene preserve the necessary metadata for decrypting the data later on.
 
 ---
 
@@ -23,19 +21,23 @@ This allows Darlene preserve the necessary metadata for decrypting the data late
     - [x] Arrays (using JSON)
     - [x] Plain Text & Binary files
 
-> **Note**: Ensure to include the binary flag (`-B`) when working with binary files, usually these are files that display garbage data when opened in a text editor, e.g. '.png', '.pdf', '.docx', '.exe', '.AppImage', etc.
+## Note on JSON and Binary Content
 
-> **Caution**: If you are decrypting binary content that requires exec (`+x`) permissions then include the `-X` or `--exec` flag. You could also use the flag if you aren't sure whether the binary content being decrypted would require exec (`+x`) permissions.
+Ensure to include the binary flag (`-B`) when encrypting binary files. Usually these are files that display garbage data when opened in a text editor, e.g. '.png', '.pdf', '.docx', '.exe', '.AppImage', etc. As for JSON content, use the json flag (`-J` or `--json`) when encryptin JSON files.
+
+Without the above flags, both encrypted JSON and Binary files would not be properly decrypted back to their original formats.
+
+> **Caution**: If you are decrypting binary content that requires exec (`+x`) permissions, include the `-X` or `--exec` flag. You could also use the flag if you aren't sure whether the binary content being decrypted would require exec permissions.
 
 ---
 
-# Upgrading from version 0.6.x
+# Upgrading from version 0.5.x
 
-After the `v0.6.0` release, the [drln file structure](./docs/darlene_file_format.md) was changed to make reading the drln data easier and also make discovery of drln files easier, as they now begin with the 4 Byte magic number '`44 4E 17 29`'.
+After the `v0.6.0` release, the [drln file structure](./docs/darlene_file_format.md) was changed to make reading the drln file data easier, and to also make discovery of drln files easier as they now begin with the 4 Byte magic number '`44 4E 17 29`' (or '`DN\u0017)`' when decoded using 'utf-8').
 
 If you are trying to decrypt an older drln file created by `darlene` v0.5.x or older, include the `-legacy` or `-L` flag.
 
-**Note**: If you are not sure whether a drln file is a legacy drln file, try decrypting normally (i.e. `$ darlene -f [drln file] -o [output file] -D ...`), if you get the following error: "`Darlene file contains an invalid magic number.`", then it is highly likely that the drln file is a legacy file as legacy files had no magic number, which means you should include the legacy flag (`-L` or `--legacy`). Additionally, if after adding the legacy flag you get the following error: "`darlene: Darlene file does not have a valid version number.`", then it is likely that the file is not a drln file.
+**Note**: If you are not sure whether a drln file is a legacy drln file, try decrypting normally (i.e. `$ darlene -f [drln file] -o [output file] -D ...`), if you get the following error: "`darlene: Darlene file contains an invalid magic number.`", then it is likely that the drln file is a legacy file, as legacy files had no magic number, which means you should include the legacy flag (`-L` or `--legacy`). Additionally, if after adding the legacy flag you get the following error: "`darlene: Darlene file does not have a valid version number.`", then it is likely that the file is not a drln file.
 
 # Install CLI
 
