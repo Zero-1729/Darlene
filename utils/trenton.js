@@ -246,11 +246,6 @@ const checkSemantics = (metas) => {
         throw `darlene: tag must be provided to decrypt data`
     }
 
-    // Check whether non darlene file provided with decrypt op
-    if ((metas.decrypt) && (!isDarleneFile(metas.file) && metas.content == null)) {
-        throw `darlene: can only decrypt '.drln' files and raw content (see '-c' flag usage)`
-    }
-
     // Check that both binary and json flag not used together
     if (metas.isBinary && metas.isJSON) {
         throw `darlene: cannot use both binary (-B) and json (-J) flag.`
