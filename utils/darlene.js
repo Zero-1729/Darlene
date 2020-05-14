@@ -1,5 +1,5 @@
 const { HexToBuffer } = require('./hex')
-const { CreateNewData, CreateLegacyData, GetMeta, ReadFile } = require('./file')
+const { CreateData, CreateLegacyData, GetLegacyMeta, GetMeta, ReadFile } = require('./file')
 const { AbbvEnconding, ExpandEncoding } = require('./encoding')
 
 const crypto = require('crypto')
@@ -175,17 +175,7 @@ const EncryptFlat = (passphrase, data, meta) => {
         meta.ext[0] == '.' ? meta.ext.slice(1) : meta.ext
     }
 
-    return meta.legacy ? CreateLegacyData({
-        mode: meta.mode,
-        iv: iv,
-        keylength: meta.keylength,
-        encoding: AbbvEnconding(meta.encoding),
-        tag: tag,
-        hash: content,
-        isJSON: meta.isJSON,
-        isBinary: meta.isBinary,
-        ext: meta.ext
-    }) : CreateNewData({
+    return CreateData({
         mode: meta.mode,
         iv: iv,
         keylength: meta.keylength,
@@ -216,9 +206,9 @@ const EncryptFlat = (passphrase, data, meta) => {
 *
 */
 
-const DecryptFlat = (passphrase, data) => {
+const DecryptFlat = (passphrase, data, legacy=false) => {
     // Scrapp darlene data
-    let meta = Buffer.isBuffer(data) ? GetMeta(data) : data
+    let meta = Buffer.isBuffer(data) ? (legacy ? GetLegacyMeta(data) : GetMeta(data)) : data
 
     let key = CreateKey(passphrase, meta.keylength/8)
     let iv = meta.iv
@@ -323,7 +313,7 @@ const EncryptFileSync = (passphrase, fp, meta) => {
         meta.ext[0] == '.' ? meta.ext.slice(1) : meta.ext
     }
 
-    return meta.legacy ? CreateLegacyData(meta) : CreateNewData(meta)
+    return CreateData(meta)
 }
 
 
@@ -344,8 +334,8 @@ const EncryptFileSync = (passphrase, fp, meta) => {
 *
 */
 
-const DecryptFileSync = (passphrase, fp) => {
-    let meta = GetMeta(ReadFile(fp))
+const DecryptFileSync = (passphrase, fp, legacy=false) => {
+    let meta = legacy ? GetLegacyMeta(ReadFile(fp)) : GetMeta(ReadFile(fp))
     let content = meta.hash
 
     let key = CreateKey(passphrase, meta.keylength/8)
