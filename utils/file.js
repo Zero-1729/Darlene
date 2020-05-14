@@ -294,7 +294,7 @@ const GetMeta = (buff) => {
 
         let contentFlag = buff[multiplier == 32 ? 58 : 42]
 
-        let content = buff.slice(multiplier == 32 ? 58 + 1 : 42 + 1)
+        let content = buff.slice(multiplier == 32 ? 58 + 1 : 42 + 1).toString(encoding)
 
         return {
             magic_num: magic_num.toString('hex'),
