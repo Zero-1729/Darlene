@@ -1,6 +1,6 @@
 .\" Manpage for darlene.
 .\" Contact Zero-1729@protonmail.com to correct errors or typos.
-.TH man 8 "01 Jan 2020" "0.1.0-b" "dalrene man page"
+.TH man 8 "14 May 2020" "0.6.0" "dalrene man page"
 .SH NAME
 darlene \- A Symmetric encryption/decryption tool 
 .SH SYNOPSIS
