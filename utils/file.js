@@ -392,4 +392,4 @@ const WriteFile = (fp, data, ext='drln', concat=false) => {
     return outfp
 }
 
-module.exports = { ReadFile, WriteFile, CreateNewData, CreateLegacyData, GetMeta, PrintContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, JoinFP, SplitFP, StripMerge, isDirectory }
+module.exports = { ReadFile, WriteFile, CreateData, CreateLegacyData, GetLegacyMeta, GetMeta, PrintContent, PrintLegacyContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, JoinFP, SplitFP, StripMerge, isDirectory }
