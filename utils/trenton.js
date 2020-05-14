@@ -257,7 +257,7 @@ const checkSemantics = (metas) => {
     }
 
     // Check that legacy flag only used with decrypt flag
-    if (!(metas.legacy && metas.decrypt)) {
+    if (metas.legacy && !metas.decrypt) {
         throw `darlene: cannot use legacy (-L) flag without decrypt flag (-D).`
     }
 
