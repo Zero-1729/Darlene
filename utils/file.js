@@ -290,7 +290,7 @@ const GetMeta = (buff) => {
         let tag_lim = 18 + multiplier
 
         let encoding = ExpandEncoding(buff.slice(tag_lim, tag_lim + 3).toString('utf8'))
-        let file_ext = buff.slice(tag_lim + 3, tag_lim + 3 + 6)
+        let file_ext = buff.slice(tag_lim + 3, tag_lim + 3 + 5)
 
         let contentFlag = buff[multiplier == 32 ? 58 : 42]
 
