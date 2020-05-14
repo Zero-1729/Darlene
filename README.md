@@ -6,7 +6,7 @@ A Symmetric Encryption Tool.
 
 ---
 
-**Note**: When Darlene encrypts data, be it a text/binary file, array, string/JSON or Buffer, she outputs a [darlene](./docs/darlene_file_format.md) (drln) file, which allows Darlene preserve the necessary metadata for decrypting the data later on.
+**Note**: When Darlene encrypts data, be it a text/binary file, array, string/JSON or Buffer, she outputs a [darlene (drln) file](./docs/darlene_file_format.md), which allows Darlene preserve the necessary metadata for decrypting the data later on.
 
 ---
 
@@ -14,12 +14,14 @@ A Symmetric Encryption Tool.
 > 
 > Check [the sample code](./examples/buffer/buffer.js) for more info.
 
-- Darlene can Encrypt/Decrypt:
+- Darlene can encrypt just about anything:
     - [x] JSON
-    - [x] String
+    - [x] String/Plain text
     - [x] Buffer
     - [x] Arrays (using JSON)
-    - [x] Plain Text & Binary files
+    - [x] Plain Text, JSON, & Binary files
+
+- and only decrypt [Darlene (drln) files](./docs/darlene_file_format.md).
 
 ## Note on JSON and Binary Content
 
