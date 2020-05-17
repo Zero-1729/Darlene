@@ -98,7 +98,10 @@ const getValue = (args, idx) => {
 
         // expand single flag name
         // E.g. 'B' -> 'binary'
-        idx = (idx + 1 == flags.length) || (idx - 1 % 2 == 0) ? idx : idx + 1
+        // For single letters we go forward
+        if (idx % 2 == 0) {
+            idx = (idx + 1 == flags.length) || (idx - 1 % 2 == 0) ? idx : idx + 1
+        }
 
         // Remember including a flag sets the value to true
         return {arg: flags[idx], value: true, inc: 0, ret_val: 0, invalid: false, valids: []}
