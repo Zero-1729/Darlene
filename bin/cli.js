@@ -9,7 +9,7 @@ const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('
 const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, JoinFP, SplitFP, StripMerge, GetExt, isDirectory } = require('./../utils/file')
 const { ReadInput } = require('./../utils/psswd')
 
-const VERSION = "0.5.3"
+const VERSION = "0.5.4"
 
 console.log('-------------')
 console.log('Darlene CLI')
