@@ -110,16 +110,41 @@ const PrintContent = (data) => {
         let info = GetMeta(data)
 
         console.log("\n-------BEGIN DARLENE DIGEST")
-        console.log("version: ", info.version)
-        console.log("mode: ", info.version == 1 ? "cbc" : "gcm")
-        console.log("key length: ", info.keylength)
-        console.log("encoding: ", info.encoding)
-        console.log("\nBinary: ", info.isBinary)
-        console.log("\nJSON: ", !info.isJSON)
-        console.log("\niv (hex): ", info.iv.toString('hex'))
+        console.log("\n[Tip]")
+        console.log(`\tMagic Number: ${info.magic_num}`)
+        console.log("\n[Header]")
+        console.log(`\n\t(file) version: ${info.version}`)
+        console.log(`\t(AES) Mode: ${info.version == 1 ? "cbc" : "gcm"}`)
+        console.log(`\t(AES) key length: ${info.keylength}`)
+        console.log(`\tIV (hex): ${info.iv.toString('hex')}`)
+        console.log(`\tTag (hex): ${info.tag.toString('hex')}`)
+        console.log(`\t(file) encoding: ${info.encoding}`)
+        console.log(`\t(file) Ext (ascii): ${isEmptyBuffer(info.ext) ? '-' : info.ext.toString()}`)
 
-        console.log("\ntag (hex): ", info.tag.toString('hex'))
-        console.log("\next (ascii): ", isEmptyBuffer(info.ext) ? '-' : info.ext.toString())
+        console.log("\n[misc]")
+        console.log(`\n\tEncrypted Content Type: ${info.isBinary ? 'Binary' : (info.isJSON ? 'JSON' : 'Plain Text')}\n`)
+        console.log("END DARLENE DIGEST---------")
+    } else {
+        console.log(data)
+    }
+}
+
+const PrintLegacyContent = (data) => {
+    if (Buffer.isBuffer(data)) {
+        // We have a darlene data blob
+        let info = GetLegacyMeta(data)
+
+        console.log("\n-------BEGIN DARLENE DIGEST")
+        console.log(`\n(File) Version: ${info.version}`)
+        console.log(`(AES) Mode: ${info.version == 1 ? "cbc" : "gcm"}`)
+        console.log(`(AES) Key length: ${info.keylength}`)
+        console.log(`(File) Encoding: ${info.encoding}`)
+        console.log(`IV (hex): ${info.iv.toString('hex')}`)
+
+        console.log(`\nEncrypted Content Type: ${info.isBinary ? 'Binary' : (info.isJSON ? 'JSON' : 'Plain Text')}`)
+
+        console.log(`\nTag (hex): ${info.tag.toString('hex')}`)
+        console.log(`(File) Ext (ascii): ${isEmptyBuffer(info.ext) ? '-' : info.ext.toString()}\n`)
 
         console.log("END DARLENE DIGEST---------")
     } else {
@@ -127,7 +152,69 @@ const PrintContent = (data) => {
     }
 }
 
+// New format drln file creator
 const CreateData = (meta) => {
+    /// Total Tip: 4 Bytes
+    // Tip: Magic number (4 B)
+    let hexed_string = '444E1729' // Start with the magic number
+
+    /// Header total: 42 - 56 Bytes
+    // Header (1/6): File version byte (1 B)
+    hexed_string += meta.mode == 'cbc' ? '01' : '02'
+
+    // Header (2/6): AES key length (1 B)
+    hexed_string += keylengths[meta.keylength]
+
+    // Header (3/6): Encrypted data IV (16 B)
+    if (Buffer.isBuffer(meta.iv)) {
+        hexed_string += meta.iv.toString('hex')
+    } else {
+        // Assuming it is in the form '0x...'
+        hexed_string += meta.iv.slice(0, 2) == '0x' ? meta.iv.slice(2) : meta.iv
+    }
+
+    // Header (4/6): AES Tag details (16 - 32 B)
+    if (Buffer.isBuffer(meta.tag)) {
+        hexed_string += meta.tag.toString('hex')
+    } else {
+        hexed_string += meta.tag
+    }
+
+    // Header (5/6): Data encoding (3 B)
+    let tmp_buff = Buffer.alloc(3)
+    let zipped_encoding = AbbvEnconding(meta.encoding)
+    tmp_buff.asciiWrite(zipped_encoding)
+    hexed_string += tmp_buff.toString('hex')
+
+    // Header (6/6): Data File extention tag (5 B)
+    if (meta.ext) {
+        tmp_buff = Buffer.alloc(5)
+        tmp_buff.asciiWrite(meta.ext)
+        hexed_string += tmp_buff.toString('hex')
+    } else {
+        hexed_string += '0000000000'
+    }
+
+    /// Body total: 1 Byte + variable Bytes
+    // Body (1/2): Content type flag (1 B)
+    if (meta.isBinary) {
+        hexed_string += '02'
+    } else if (meta.isJSON) {
+        hexed_string += '01'
+    } else {
+        // Plain text 
+        hexed_string += '00'
+    }
+
+    // Body (2/2): Encrypted content
+    hexed_string += MakeBuffer(meta.hash, meta.encoding).toString('hex')
+
+    // translate all data into buffer
+    return Buffer.from(hexed_string, 'hex')
+}
+
+// Older format drln file creator
+const CreateLegacyData = (meta) => {
     let hexed_string = ''
 
     // We fill in the 'hexed_string' one piece of info at a time
@@ -184,7 +271,59 @@ const CreateData = (meta) => {
 }
 
 const GetMeta = (buff) => {
+    let magic_num = buff.slice(0, 4)
+
+    // Cut data
+    buff = buff.slice(4)
+
+    // Only continue to read data if the magic number matches
+    if (magic_num.toString('hex') == '444e1729') {
+        let file_ver = buff[0]
+        let keylength = buff[1] + 1
+        let iv = buff.slice(2, 18)
+
+        let tag_type = file_ver == 1 ? 'extended' : 'compressed'
+        let multiplier = tag_type == 'extended' ? 32 : 16
+
+        let tag = buff.slice(18, 18 + multiplier)
+
+        let tag_lim = 18 + multiplier
+
+        let encoding = ExpandEncoding(buff.slice(tag_lim, tag_lim + 3).toString('utf8'))
+        let file_ext = buff.slice(tag_lim + 3, tag_lim + 3 + 5)
+
+        let contentFlag = buff[multiplier == 32 ? 58 : 42]
+
+        let content = buff.slice(multiplier == 32 ? 58 + 1 : 42 + 1).toString(encoding)
+
+        return {
+            magic_num: magic_num.toString('hex'),
+            version: file_ver,
+            mode: file_ver == 1 ? 'cbc' : 'gcm',
+            keylength: keylength,
+            encoding: encoding,
+            iv: iv,
+            isBinary: contentFlag == 2,
+            isJSON: contentFlag == 1,
+            hash: content,
+            tag: tag,
+            ext: file_ext
+        }
+    } else { 
+        throw `darlene: Darlene file contains an invalid magic number.`
+    }
+}
+
+const GetLegacyMeta = (buff) => {
     let version = buff[0]
+
+    // Best possible check for validity of drln file
+    // If the suspected drln file has a version outside the recognized 
+    // ... versions range then it is probavly not a genuine darlene file
+    if (!(version >= 0x01 && version <= 0x02)) {
+        throw `darlene: Darlene file does not have a valid version number.`
+    }
+
     let keylength = buff[1] + 1
     let encoding = ExpandEncoding(buff.slice(2, 5).toString('utf8'))
     let iv = buff.slice(5, 21)
@@ -256,4 +395,4 @@ const WriteFile = (fp, data, ext='drln', concat=false) => {
     return outfp
 }
 
-module.exports = { ReadFile, WriteFile, CreateData, GetMeta, PrintContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, JoinFP, SplitFP, StripMerge, isDirectory }
+module.exports = { ReadFile, WriteFile, CreateData, CreateLegacyData, GetLegacyMeta, GetMeta, PrintContent, PrintLegacyContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, JoinFP, SplitFP, StripMerge, isDirectory }

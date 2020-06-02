@@ -6,10 +6,10 @@ const cp   = require('child_process')
 
 const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
 const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
-const { ReadFile, WriteFile, GetMeta, isEmptyBuffer, isDarleneFile, JoinFP, SplitFP, StripMerge, GetExt, isDirectory } = require('./../utils/file')
+const { ReadFile, WriteFile, GetMeta, GetLegacyMeta, PrintContent, isEmptyBuffer, isDarleneFile, JoinFP, SplitFP, StripMerge, GetExt, isDirectory } = require('./../utils/file')
 const { ReadInput } = require('./../utils/psswd')
 
-const VERSION = "0.5.4"
+const VERSION = "0.6.0"
 
 console.log('-------------')
 console.log('Darlene CLI')
@@ -31,6 +31,7 @@ const help = () => {
     console.log("-E  --encrypt\t\targs: - \t\tRequired flag to indicate whether to encrypt.\n\n")
     console.log("-D  --decrypt\t\targs: - \t\tRequired flag to indicate whether to decrypt.\n\n")
     console.log("-J  --json\t\targs: - \t\tFlag to indicate content type of plain text.\n\n\t\t\tDefaults to false.\n\n")
+    console.log("-L  --legacy\t\targs: - \t\tFlag to indicate whether to decrypt older drln files created with v0.5.x or older.\n\n")
     console.log("-S  --show\t\targs: - \t\tFlag to show contents of file written.\n\n\t\t\tDefaults to false.")
     console.log("-B  --binary\t\targs: - \t\tFlag to indicate the input file is a binary file.\n\n\t\t\tDefaults to false.")
     console.log("-C  --concat\t\targs: - \t\tFlag to indicate whether 'drln' extension in decryption should be concatenated with output file extension.\n\n\t\tDefaults to false.")
@@ -78,6 +79,7 @@ const help = () => {
                 encoding: metas.encoding,
                 isJSON: metas.isJSON,
                 isBinary: metas.isBinary,
+                legacy: metas.legacy,
                 ext: 'txt'
             }
 
@@ -151,9 +153,7 @@ const help = () => {
                     console.log(`[+] Wrote file: '${out_fp}'`)
 
                     if (metas.show) {
-                        console.log("\n-------BEGIN DARLENE DIGEST")
-                        console.log(GetMeta(blob))
-                        console.log("END DARLENE DIGEST---------")
+                        PrintContent(blob)
                     }
                 } else {
                     // Obtain remaining file info
@@ -186,9 +186,7 @@ const help = () => {
                     console.log(`[+] Wrote file: '${out_fp}'`)
 
                     if (metas.show) {
-                        console.log("\n-------BEGIN DARLENE DIGEST")
-                        console.log(GetMeta(ReadFile(out_fp)))
-                        console.log("END DARLENE DIGEST---------")
+                        PrintContent(ReadFile(out_fp))
                     }
                 }
             } else {
@@ -217,7 +215,7 @@ const help = () => {
                     meta.hash = metas.content
 
                     console.log('[*] Attempting to decrypt content...')
-                    decrypted = DecryptFlat(key, meta)
+                    decrypted = DecryptFlat(key, meta, meta.legacy)
 
                     if (metas.show) {
                         console.log('[+] Recovered:')
@@ -244,11 +242,11 @@ const help = () => {
                     let blob = ReadFile(raw_input_fp)
 
                     console.log('[*] Attempting to decrypt content...')
-                    decrypted = DecryptFileSync(key, raw_input_fp).plain
+                    decrypted = DecryptFileSync(key, raw_input_fp, meta.legacy).plain
 
                     // Extract new file content
                     console.log('[*] Extracting encrypted file extension...')
-                    let file_info = GetMeta(blob)
+                    let file_info = meta.legacy ? GetLegacyMeta(blob) : GetMeta(blob)
 
                     // Remember 'drln' does not store dot
                     ext = GetExt(file_info.ext)

@@ -1,5 +1,5 @@
 const { HexToBuffer } = require('./hex')
-const { CreateData, GetMeta, ReadFile } = require('./file')
+const { CreateData, CreateLegacyData, GetLegacyMeta, GetMeta, ReadFile } = require('./file')
 const { AbbvEnconding, ExpandEncoding } = require('./encoding')
 
 const crypto = require('crypto')
@@ -206,9 +206,9 @@ const EncryptFlat = (passphrase, data, meta) => {
 *
 */
 
-const DecryptFlat = (passphrase, data) => {
+const DecryptFlat = (passphrase, data, legacy=false) => {
     // Scrapp darlene data
-    let meta = Buffer.isBuffer(data) ? GetMeta(data) : data
+    let meta = Buffer.isBuffer(data) ? (legacy ? GetLegacyMeta(data) : GetMeta(data)) : data
 
     let key = CreateKey(passphrase, meta.keylength/8)
     let iv = meta.iv
@@ -334,8 +334,8 @@ const EncryptFileSync = (passphrase, fp, meta) => {
 *
 */
 
-const DecryptFileSync = (passphrase, fp) => {
-    let meta = GetMeta(ReadFile(fp))
+const DecryptFileSync = (passphrase, fp, legacy=false) => {
+    let meta = legacy ? GetLegacyMeta(ReadFile(fp)) : GetMeta(ReadFile(fp))
     let content = meta.hash
 
     let key = CreateKey(passphrase, meta.keylength/8)

@@ -1,10 +1,10 @@
 .\" Manpage for darlene.
 .\" Contact Zero-1729@protonmail.com to correct errors or typos.
-.TH man 8 "01 Jan 2020" "0.1.0-b" "dalrene man page"
+.TH man 8 "14 May 2020" "0.6.0" "dalrene man page"
 .SH NAME
 darlene \- A Symmetric encryption/decryption tool 
 .SH SYNOPSIS
-darlene [-fc] [FILE][STRING] [-o] [FILE] [-DEmkxit] [-JSBh]
+darlene [-fc] [FILE][STRING] [-o] [FILE] [-DEmkxit] [-JSBLh]
 .SH DESCRIPTION
 darlene encrypts/decrypts raw content or files into 'drln' files, and back to the raw content or plain/binary files, respectively.
 .SH EXAMPLES
@@ -80,6 +80,8 @@ darlene -f server_key.drln -o ~/admin/server_key.pub -C -D
     -B  --binary        -               Flag to indicate the input file is a binary file.
     
                                         Defaults to false when left out.
+
+    -L --legacy         -               Flag to indicate whether to decrypt older drln files created with v0.5.x or older.
 
     -C  --concat        -               Flag to indicate whether the 'drln' stored extension in decryption should be concatenated with output file extension.
     
