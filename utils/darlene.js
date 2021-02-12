@@ -399,7 +399,7 @@ const DecryptFileSync = (passphrase, fp, legacy=false) => {
             // Writing file should be handled externally
             return {plain: decrypted, metas: meta}
         } catch (e) {
-            throw new TagError("wrong passphrase entered: bad or forged tag detected!")
+            throw new AuthError("wrong passphrase entered: bad or forged tag detected!")
         }
     }
 }
