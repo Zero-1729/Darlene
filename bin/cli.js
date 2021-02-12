@@ -15,7 +15,7 @@ const { ReadFile, WriteFile,
 const { ReadInput }                                = require('./../utils/psswd')
 
 
-const VERSION = "0.6.0"
+const VERSION = "0.6.4"
 
 console.log('-------------')
 console.log('Darlene CLI')
