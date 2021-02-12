@@ -1,7 +1,7 @@
 const { AbbvEnconding, ExpandEncoding, MakeBuffer } = require('./encoding')
 
-const fs   = require('fs')
-const path = require('path')
+const fs                                            = require('fs')
+const path                                          = require('path')
 
 
 const isEmptyBuffer = (buff) => {

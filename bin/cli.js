@@ -4,10 +4,16 @@ const path = require('path')
 const fs   = require('fs')
 const cp   = require('child_process')
 
-const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
-const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
-const { ReadFile, WriteFile, GetMeta, GetLegacyMeta, PrintContent, isEmptyBuffer, isDarleneFile, JoinFP, SplitFP, StripMerge, GetExt, isDirectory } = require('./../utils/file')
-const { ReadInput } = require('./../utils/psswd')
+const { buildMeta, sanitizeArgs, checkSemantics }  = require('../utils/trenton')
+const { EncryptFlat, EncryptFileSync,
+        DecryptFlat, DecryptFileSync }             = require('./../utils/darlene')
+const { ReadFile, WriteFile,
+        GetMeta, GetLegacyMeta,
+        PrintContent, isEmptyBuffer,
+        isDarleneFile, JoinFP, SplitFP,
+        StripMerge, GetExt, isDirectory }          = require('./../utils/file')
+const { ReadInput }                                = require('./../utils/psswd')
+
 
 const VERSION = "0.6.0"
 

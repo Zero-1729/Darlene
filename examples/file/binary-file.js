@@ -1,6 +1,7 @@
-const { WriteFile } = require('../../utils/file')
-const { EncryptFileSync, DecryptFileSync } = require('../../utils/darlene')
-const { ReadInput } = require('../../utils/psswd')
+const { WriteFile }       = require('../../utils/file')
+const { EncryptFileSync,
+        DecryptFileSync } = require('../../utils/darlene')
+const { ReadInput }       = require('../../utils/psswd')
 
 const path = require('path')
 

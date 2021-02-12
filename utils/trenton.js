@@ -2,9 +2,9 @@
 * Trenton: A small hacky commandline wrangler
 */
 
-const path = require('path')
+const path                                         = require('path')
 
-const { isDarleneFile, isValidPath, isDirectory } = require('./file')
+const { isDarleneFile, isValidPath, isDirectory }  = require('./file')
 
 // Easily translate some options to metas key
 const meta_aliases = {

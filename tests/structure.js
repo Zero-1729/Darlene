@@ -1,6 +1,7 @@
 const { GetMeta, CreateData } = require('./../utils/file')
-const { GetExt } = require('./../utils/file')
-const crypto = require('crypto')
+const { GetExt }              = require('./../utils/file')
+const crypto                  = require('crypto')
+
 
 // We have to essentially fake the darlene data
 let meta = {

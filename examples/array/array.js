@@ -1,6 +1,6 @@
-const { EncryptFlat, DecryptFlat } = require('../../utils/darlene')
-const { PrintContent } = require('../../utils/file')
-const { Matches } = require('../../utils/match')
+const { EncryptFlat, DecryptFlat }  = require('../../utils/darlene')
+const { PrintContent }              = require('../../utils/file')
+const { Matches }                   = require('../../utils/match')
 
 let secret = 'thisisnotsecure'
 

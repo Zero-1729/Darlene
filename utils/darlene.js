@@ -1,8 +1,9 @@
-const { HexToBuffer } = require('./hex')
-const { CreateData, CreateLegacyData, GetLegacyMeta, GetMeta, ReadFile } = require('./file')
-const { AbbvEnconding, ExpandEncoding } = require('./encoding')
+const { HexToBuffer }                                    = require('./hex')
+const { CreateData, GetLegacyMeta, GetMeta, ReadFile }   = require('./file')
+const { AbbvEnconding, ExpandEncoding }                  = require('./encoding')
 
-const crypto = require('crypto')
+const crypto                                             = require('crypto')
+
 
 /*
 * Uses AES CBC/GCM Cipher To Encrypt/Decrypt inputs
