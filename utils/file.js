@@ -1,4 +1,5 @@
 const { AbbvEnconding, ExpandEncoding, MakeBuffer } = require('./encoding')
+const { FileError, EmptyFileError }                 = require('./errors')
 
 const fs                                            = require('fs')
 const path                                          = require('path')
@@ -310,7 +311,7 @@ const GetMeta = (buff) => {
             ext: file_ext
         }
     } else { 
-        throw `darlene: Darlene file contains an invalid magic number.`
+        throw new FileError("darlene file contains an invalid magic number")
     }
 }
 
@@ -321,7 +322,7 @@ const GetLegacyMeta = (buff) => {
     // If the suspected drln file has a version outside the recognized 
     // ... versions range then it is probavly not a genuine darlene file
     if (!(version >= 0x01 && version <= 0x02)) {
-        throw `darlene: Darlene file does not have a valid version number.`
+        throw new FileError("darlene file does not have a valid version number")
     }
 
     let keylength = buff[1] + 1

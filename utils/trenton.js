@@ -6,6 +6,10 @@ const path                                         = require('path')
 
 const { isDarleneFile, isValidPath, isDirectory }  = require('./file')
 
+const { FlagError, FilePathError, IVError,
+        TagError, OptionError }                    = require('./errors')
+
+
 // Easily translate some options to metas key
 const meta_aliases = {
     'J': 'isJSON',
@@ -194,42 +198,42 @@ const isNumber = (str) => {
 const checkSemantics = (metas) => {
     // Check whether neither 'encrypt' or 'decrypt' specified
     if (!metas.encrypt && !metas.decrypt) {
-        throw `darlene: must specify either 'encrypt' or 'decrypt' operation.`
+        throw new FlagError("must specify either 'encrypt' or 'decrypt' operation")
     }
 
     // Check whether both 'decrypt' and 'encrypt'
     if (metas.encrypt && metas.decrypt) {
-        throw `darlene: can only specify one operation: encrypt or decypt, not both.`
+        throw new FlagError("can only specify one operation: encrypt or decypt, not both")
     }
 
     // Check whether both input file and content provided
     if (metas.content && metas.file) {
-        throw `darlene: must provide input file path with decrypt flag${metas.isBinary && metas.file ? ' and ' : ''}${metas.isBinary ? 'binary flag' : ''}`
+        throw new FlagError(`must provide input file path with decrypt flag${metas.isBinary && metas.file ? ' and ' : ''}${metas.isBinary ? 'binary flag' : ''}`)
     }
 
     // Check that at least an input file provided or raw content to decrypt
     if ((!metas.file && !metas.content) && metas.decrypt) {
-        throw `darlene: must provide at least an input file path or content with decrypt flag`
+        throw new FlagError("must provide at least an input file path or content with decrypt flag")
     }
 
     // Check dependent options (out <-> encrypt)
     if (metas.out == null && metas.encrypt) {
-        throw `darlene: must provide filename to write data`
+        throw new FilePathError("must provide filename to write data")
     }
 
     // Check that darlene file not provided for ecnryption (that would not make sense)
     if (isDarleneFile(metas.file) && metas.encrypt) {
-        throw `darlene: cannot encrypt a darlene ('drln') file`
+        throw new FileTypeError("cannot encrypt a darlene ('drln') file")
     }
 
     // Check that concat option provided in proper operation mode (decryption)
     if (metas.concat && !metas.decrypt) {
-        throw `darlene: -C (or --concat) flag can only be used with the -D flag.`
+        throw new FlagError("-C (or --concat) flag can only be used with the -D flag")
     }
 
     // words (-w or --words) flag can only be used when encrypting
     if ((metas.words > 0) && !metas.encrypt) {
-        throw `darlene: -w (or --words) flag can only be used when encryptng (-E)`
+        throw new FlagError("-w (or --words) flag can only be used when encryptng (-E)")
     }
 
     // must provide a full path with the words path
@@ -240,34 +244,34 @@ const checkSemantics = (metas) => {
     // Check whether IV provoded in decrypt mode
     // Dependent options (iv <-> decrypt) for raw content
     if (metas.iv == null && metas.decrypt && metas.content) {
-        throw `darlene: iv must be provided to decrypt data.`
+        throw new IVError("iv must be provided to decrypt data")
     }
 
     // Check that tag provided in decrypt mode
     // Dependant options (tag <-> decrypt) for raw content
     if (metas.tag == null && metas.decrypt && metas.content) {
-        throw `darlene: tag must be provided to decrypt data`
+        throw new TagError("tag must be provided to decrypt data")
     }
 
     // Check that both binary and json flag not used together
     if (metas.isBinary && metas.isJSON) {
-        throw `darlene: cannot use both binary (-B) and json (-J) flag.`
+        throw new FlagError("cannot use both binary (-B) and json (-J) flag")
     }
 
     // Check that legacy flag only used with decrypt flag
     if (metas.legacy && !metas.decrypt) {
-        throw `darlene: cannot use legacy (-L) flag without decrypt flag (-D).`
+        throw new FlagError("cannot use legacy (-L) flag without decrypt flag (-D)")
     }
 
     // Check whether '-X' provided with decrypt flag for file
     if (metas.exec && !(metas.decrypt && metas.file)) {
-        throw `darlene: can only use exec (-X) flag in file decryption.`
+        throw new FlagError("can only use exec (-X) flag in file decryption")
     }
 
     // Check that the words (-w) flag in the encryption mode (-E)
     // .. and can't be used with the content (-c) or file (-f) flag
     if ((metas.words > 0) && (metas.content || metas.file)) {
-        throw `darlene: -w (or --words) flag cannot be used with the content (-c) or file (-f) flag`
+        throw new FlagError("-w (or --words) flag cannot be used with the content (-c) or file (-f) flag")
     }
 
     // Log warning to alert the user of redundant behaviour
@@ -279,7 +283,7 @@ const checkSemantics = (metas) => {
 
     // Raw content needs full output path to be specified
     if (metas.content && isDirectory(metas.out)) {
-        throw `darlene: must specify a full output (with extension) with -c flag`
+        throw new FilePathError("must specify a full output (with extension) with -c flag")
     }
 
     // Warn user that 'mode', 'keylength', 'iv', 'tag', 'encoding', 'isJSON' & 'ext'
@@ -367,11 +371,11 @@ const buildMeta = (args) => {
             } else {
                 // Prints whether no value was provided for a flag or 
                 // whether an invalid value was provided with a certain flag
-                throw `darlene: flag '${stripArg(obj.arg)}' requires ${obj.invalid ? 'value of either' : 'an argument'} ${obj.invalid ? joinArray(obj.valids) : ''}`
+                throw new FlagError(`flag '${stripArg(obj.arg)}' requires ${obj.invalid ? 'value of either' : 'an argument'} ${obj.invalid ? joinArray(obj.valids) : ''}`)
             }
         } else {
             // Alerts user that the option does not exist
-            throw `darlene: invalid option '${stripArg(args[i])}'`
+            throw new OptionError(`invalid option '${stripArg(args[i])}'`)
         }
     }
   
