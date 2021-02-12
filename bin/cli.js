@@ -319,7 +319,7 @@ const help = () => {
             }
         } catch (e) {
             // Print errors
-            console.log(e)
+            console.log(`[${e.name}]: ${e.message}`)
 
             // Print additional message if CLI error
             if (['FlagError', 'OptionError'].includes(e.name)) {
