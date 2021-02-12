@@ -329,22 +329,36 @@ const buildMeta = (args) => {
                 // Since it determins the file content type
                 // ... we have to set the 'ext' to true and then fill later
                 // ... this way, Darlene can handle the file contents properly when encrypting/decryprting
-                if (obj.arg == 'binary') {
-                    metas.isBinary = true
-                } else if (obj.arg == 'exec') {
-                    metas.exec     = true
-                } else if (obj.arg == 'encrypt') {
-                    metas.encrypt  = true
-                } else if (obj.arg == 'decrypt') {
-                    metas.decrypt  = true
-                } else if (obj.arg == 'json') {
-                    metas.isJSON   = true
-                } else if (obj.arg == 'legacy') {
-                    metas.legacy   = true
-                } else {
-                    // Other metas are updating by direct indexing
-                    // ... since the 'arg' is expanded and matches the keys
-                    metas[obj.arg] = isNumber(String(obj.value)) ? Number(obj.value) : obj.value
+                switch (obj.arg) {
+                    case 'binary':
+                        metas.isBinary = true
+                        break
+
+                    case 'exec':
+                        metas.exec     = true
+                        break
+
+                    case 'encrypt':
+                        metas.encrypt  = true
+                        break
+
+                    case 'decrypt':
+                        metas.decrypt  = true
+                        break
+
+                    case 'json':
+                        metas.isJSON   = true
+                        break
+
+                    case 'legacy':
+                        metas.legacy   = true
+                        break
+
+                    default:
+                        // Other metas are updating by direct indexing
+                        // ... since the 'arg' is expanded and matches the keys
+                        metas[obj.arg] = isNumber(String(obj.value)) ? Number(obj.value) : obj.value
+                        break
                 }
     
                 // Instead of a single increment
