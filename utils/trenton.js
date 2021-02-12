@@ -238,7 +238,7 @@ const checkSemantics = (metas) => {
 
     // must provide a full path with the words path
     if ((metas.words > 0) && (path.extname(metas.out) > 0)) {
-        console.log('darlene: file output path extension would be overwritten to json when the -w (or --words) flag')
+        console.log('[Warn] file output path extension would be overwritten to json when the -w (or --words) flag')
     }
 
     // Check whether IV provoded in decrypt mode
@@ -278,7 +278,7 @@ const checkSemantics = (metas) => {
     // If '-w' flag (words) is used with '-J' to encrypt its quite redundant
     // ... as we already treat is as JSON
     if (metas.encrypt && (metas.words > 0) && metas.isJSON) {
-        console.log('darlene: [warn] input is already encrypted as JSON when -w or --words flag used.')
+        console.log('[Warn] input is already encrypted as JSON when -w or --words flag used')
     }
 
     // Raw content needs full output path to be specified
@@ -290,7 +290,7 @@ const checkSemantics = (metas) => {
     // ... would be replaced by data in darlene file
     if ((metas.mode || meta.keylength || metas.iv || metas.tag || metas.encoding || metas.isJSON || metas.isBinary) && 
     (isDarleneFile(metas.file))) {
-        console.log('darlene: [warn] values for mode, keylength, iv, tag, encoding, isJSON & isBinary would be overridden by darlene content')
+        console.log('[Warn] values for mode, keylength, iv, tag, encoding, isJSON & isBinary\n\twould be overridden by darlene content\n')
     }
 
     // Check that the input file path is specific
