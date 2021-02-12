@@ -365,7 +365,7 @@ const ReadFile = (fp, print=true) => {
 
         // Check whether the input file is empty
         if (content.length == 0) {
-            throw Error(`EFEMP: File empty`)
+            throw new EmptyFileError(`file empty`)
         }
 
         return content
@@ -374,14 +374,14 @@ const ReadFile = (fp, print=true) => {
 
         // File does not exist or attempt to read directory
         if (code == 'ENOENT') {
-            msg = `File or directory '${fp}' does not exist.`
+            msg = `file or directory '${fp}' does not exist.`
         } else if (code == 'EISDIR') {
-            msg = `Cannot read directory '${fp}'.`
-        } else if (code == 'EFEMP') {
-            msg = `File '${fp}' is empty`
+            msg = `cannot read directory '${fp}'.`
+        } else if (e.name == 'EmptyFileError') {
+            msg = `file '${fp}' is empty`
         }
 
-        throw `[FileError] ${msg}`
+        throw new FileError(msg)
     }
 }
 
