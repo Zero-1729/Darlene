@@ -321,8 +321,8 @@ const help = () => {
             // Print errors
             console.log(e)
 
-            // Print additional message if cli error
-            if (e.includes('darlene')) {
+            // Print additional message if CLI error
+            if (['FlagError', 'OptionError'].includes(e.name)) {
                 console.log("use -h flag to print list of options and usage")
             }
         }
