@@ -4,7 +4,7 @@
 
 const path                                         = require('path')
 
-const { isDarleneFile, isValidPath, isDirectory }  = require('./file')
+const { isDarleneFile, isInvalidPath, isDirectory }  = require('./file')
 
 const { FlagError, FilePathError, IVError,
         TagError, OptionError }                    = require('./errors')
@@ -294,12 +294,12 @@ const checkSemantics = (metas) => {
     }
 
     // Check that the input file path is specific
-    if (isValidPath(metas.file)) {
+    if (isInvalidPath(metas.file)) {
         throw new FilePathError("input file must be more specific than '.'")
     }
 
     // Check that the input file path is specific
-    if (metas.words > 0 && isValidPath(metas.out)) {
+    if (metas.words > 0 && isInvalidPath(metas.out)) {
         throw new FilePathError("output file must be more specific than '.'")
     }
 }
