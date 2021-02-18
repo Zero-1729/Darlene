@@ -1,7 +1,8 @@
 const { AbbvEnconding, ExpandEncoding, MakeBuffer } = require('./encoding')
+const { FileError, EmptyFileError }                 = require('./errors')
 
-const fs   = require('fs')
-const path = require('path')
+const fs                                            = require('fs')
+const path                                          = require('path')
 
 
 const isEmptyBuffer = (buff) => {
@@ -77,7 +78,7 @@ const SplitFP = (fp, single=false) => {
     return {fp: fp, ext: ''}
 }
 
-const isValidPath = (fp) => {
+const isInvalidPath = (fp) => {
     if (fp == null) {
         return false
     } else {
@@ -310,7 +311,7 @@ const GetMeta = (buff) => {
             ext: file_ext
         }
     } else { 
-        throw `darlene: Darlene file contains an invalid magic number.`
+        throw new FileError("darlene file contains an invalid magic number")
     }
 }
 
@@ -321,7 +322,7 @@ const GetLegacyMeta = (buff) => {
     // If the suspected drln file has a version outside the recognized 
     // ... versions range then it is probavly not a genuine darlene file
     if (!(version >= 0x01 && version <= 0x02)) {
-        throw `darlene: Darlene file does not have a valid version number.`
+        throw new FileError("darlene file does not have a valid version number")
     }
 
     let keylength = buff[1] + 1
@@ -364,7 +365,7 @@ const ReadFile = (fp, print=true) => {
 
         // Check whether the input file is empty
         if (content.length == 0) {
-            throw Error(`EFEMP: File empty`)
+            throw new EmptyFileError(`file empty`)
         }
 
         return content
@@ -373,14 +374,14 @@ const ReadFile = (fp, print=true) => {
 
         // File does not exist or attempt to read directory
         if (code == 'ENOENT') {
-            msg = `File or directory '${fp}' does not exist.`
+            msg = `file or directory '${fp}' does not exist.`
         } else if (code == 'EISDIR') {
-            msg = `Cannot read directory '${fp}'.`
-        } else if (code == 'EFEMP') {
-            msg = `File '${fp}' is empty`
+            msg = `cannot read directory '${fp}'.`
+        } else if (e.name == 'EmptyFileError') {
+            msg = `file '${fp}' is empty`
         }
 
-        throw `[FileError] ${msg}`
+        throw new FileError(msg)
     }
 }
 
@@ -402,4 +403,7 @@ const WriteFile = (fp, data, ext='drln', concat=false) => {
     return outfp
 }
 
-module.exports = { ReadFile, WriteFile, CreateData, CreateLegacyData, GetLegacyMeta, GetMeta, PrintContent, PrintLegacyContent, isEmptyBuffer, GetExt, isDarleneFile, isValidPath, JoinFP, SplitFP, StripMerge, isDirectory }
+module.exports = { ReadFile, WriteFile, CreateData, CreateLegacyData,
+                   GetLegacyMeta, GetMeta, PrintContent, PrintLegacyContent,
+                   isEmptyBuffer, GetExt, isDarleneFile, isInvalidPath,
+                   JoinFP, SplitFP, StripMerge, isDirectory }

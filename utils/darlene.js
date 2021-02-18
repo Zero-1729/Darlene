@@ -1,8 +1,11 @@
-const { HexToBuffer } = require('./hex')
-const { CreateData, CreateLegacyData, GetLegacyMeta, GetMeta, ReadFile } = require('./file')
-const { AbbvEnconding, ExpandEncoding } = require('./encoding')
+const { HexToBuffer }                                    = require('./hex')
+const { CreateData, GetLegacyMeta, GetMeta, ReadFile }   = require('./file')
+const { AbbvEnconding, ExpandEncoding }                  = require('./encoding')
+const { KeylengthError, AuthError, EncodingError,
+        DecipherError, TagError }                        = require('./errors')
 
-const crypto = require('crypto')
+const crypto                                             = require('crypto')
+
 
 /*
 * Uses AES CBC/GCM Cipher To Encrypt/Decrypt inputs
@@ -32,7 +35,7 @@ const CreateKey = (passphrase, key_length=24) => {
     try {
         return crypto.scryptSync(passphrase, 'salt', key_length)
     } catch (e) {
-        throw "[KeylengthError] Key length out of valid range"
+        throw new KeylengthError("key length out of valid range")
     }
 }
 
@@ -47,7 +50,7 @@ const CreateCipher = (meta) => {
         let erratum = e.message.includes('Unknown cipher') ? 
                       'check that keylength or mode is correct' : ''
 
-        throw `[DecipherError] ${e.message}: ${erratum}`
+        throw new DecipherError(`${e.message}: ${erratum}`)
     }
 }
 
@@ -58,7 +61,7 @@ const CreateDecipher = (meta) => {
         let erratum = e.message.includes('Unknown cipher') ? 
                       'check that keylength or mode is correct' : ''
 
-        throw `[DecipherError] ${e.message}: ${erratum}`
+        throw new DecipherError(`${e.message}: ${erratum}`)
     }
 }
 
@@ -232,7 +235,7 @@ const DecryptFlat = (passphrase, data, legacy=false) => {
         // If the secret passphrase, iv or ciphertext edited
         // It will fail to encrypt
         if (meta.tag.toString('hex') != newTag) {
-            throw '[TagError] Tag Mismatch, suspecting edited inputs!'
+            throw new TagError("tag Mismatch, suspecting edited inputs!")
         }
 
         try {
@@ -244,7 +247,7 @@ const DecryptFlat = (passphrase, data, legacy=false) => {
         } catch (e) {
             let message = e.message.includes('error:0606506D') ? 'Cannot change encoding or cipher text' : e.message
             
-            throw `[EncodingError] ${message}`
+            throw new EncodingError(message)
         }
     } else {
         // GCM mode
@@ -255,7 +258,7 @@ const DecryptFlat = (passphrase, data, legacy=false) => {
 
             return meta.isJSON ? JSON.parse(text) : text
         } catch (e) {
-            throw '[AuthError] Bad or Forged tag detected!'
+            throw new AuthError("bad or Forged tag detected!")
         }
     }
 }
@@ -360,7 +363,7 @@ const DecryptFileSync = (passphrase, fp, legacy=false) => {
         // If the secret passphrase, iv or ciphertext edited
         // It will fail to encrypt
         if (meta.tag.toString('hex') != newTag) {
-            throw '[TagError] Tag Mismatch, suspecting edited inputs!'
+            throw new TagError("tag Mismatch, suspecting edited inputs!")
         }
 
         try {
@@ -378,7 +381,7 @@ const DecryptFileSync = (passphrase, fp, legacy=false) => {
         } catch (e) {
             let message = e.message.includes('error:0606506D') ? 'Cannot change encoding or cipher text' : e.message
 
-            throw `[EncodingError] ${message}`
+            throw new EncodingError(message)
         }
     } else {
         // GCM mode
@@ -396,7 +399,7 @@ const DecryptFileSync = (passphrase, fp, legacy=false) => {
             // Writing file should be handled externally
             return {plain: decrypted, metas: meta}
         } catch (e) {
-            throw '[AuthError] Wrong passphrase entered: bad or forged tag detected!'
+            throw new AuthError("wrong passphrase entered: bad or forged tag detected!")
         }
     }
 }

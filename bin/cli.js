@@ -4,12 +4,18 @@ const path = require('path')
 const fs   = require('fs')
 const cp   = require('child_process')
 
-const { buildMeta, sanitizeArgs, checkSemantics } = require('../utils/trenton')
-const { EncryptFlat, EncryptFileSync, DecryptFlat, DecryptFileSync } = require('./../utils/darlene')
-const { ReadFile, WriteFile, GetMeta, GetLegacyMeta, PrintContent, isEmptyBuffer, isDarleneFile, JoinFP, SplitFP, StripMerge, GetExt, isDirectory } = require('./../utils/file')
-const { ReadInput } = require('./../utils/psswd')
+const { buildMeta, sanitizeArgs, checkSemantics }  = require('../utils/trenton')
+const { EncryptFlat, EncryptFileSync,
+        DecryptFlat, DecryptFileSync }             = require('./../utils/darlene')
+const { ReadFile, WriteFile,
+        GetMeta, GetLegacyMeta,
+        PrintContent, isEmptyBuffer,
+        isDarleneFile, JoinFP, SplitFP,
+        StripMerge, GetExt, isDirectory }          = require('./../utils/file')
+const { ReadInput }                                = require('./../utils/psswd')
 
-const VERSION = "0.6.0"
+
+const VERSION = "0.6.4"
 
 console.log('-------------')
 console.log('Darlene CLI')
@@ -313,10 +319,10 @@ const help = () => {
             }
         } catch (e) {
             // Print errors
-            console.log(e)
+            console.log(`[${e.name}]: ${e.message}`)
 
-            // Print additional message if cli error
-            if (e.includes('darlene')) {
+            // Print additional message if CLI error
+            if (['FlagError', 'OptionError'].includes(e.name)) {
                 console.log("use -h flag to print list of options and usage")
             }
         }

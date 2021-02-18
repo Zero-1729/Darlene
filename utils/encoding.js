@@ -1,3 +1,6 @@
+const { EncodingError } = require('./errors')
+
+
 const AbbvEnconding = (str) => {
     if (str.slice(0, 4) == 'base') {
         // so that 'base64' shortens to 'b64',
@@ -18,13 +21,12 @@ const ExpandEncoding = (str) => {
     }
 }
 
-
 const MakeBuffer = (hash, encoding) => {
     // JS does not know what 'b64 is, so we expand it to 'base64'
     encoding = encoding == 'b64' ? ExpandEncoding(encoding) : encoding
 
     if (!['base64', 'hex'].includes(encoding)) {
-        throw new Error("[Encoding Error] Encoding must be either 'hex' or 'base64'")
+        throw new EncodingError("encoding must be either 'hex' or 'base64'")
     }
 
     return Buffer.from(hash, encoding)

@@ -1,6 +1,6 @@
 const { EncryptFlat, DecryptFlat } = require('../../utils/darlene')
-const { PrintContent, GetMeta } = require('../../utils/file')
-const { ReadInput } = require('../../utils/psswd')
+const { PrintContent, GetMeta }    = require('../../utils/file')
+const { ReadInput }                = require('../../utils/psswd')
 
 let secret = 'thisisnotsecure'
 let text = "Hello, friend"

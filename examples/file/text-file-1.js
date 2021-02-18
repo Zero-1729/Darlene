@@ -1,6 +1,6 @@
 const { EncryptFlat, DecryptFlat } = require('../../utils/darlene')
-const { WriteFile, ReadFile } = require('../../utils/file')
-const { ReadInput } = require('../../utils/psswd')
+const { WriteFile, ReadFile }      = require('../../utils/file')
+const { ReadInput }                = require('../../utils/psswd')
 
 const path = require('path')
 

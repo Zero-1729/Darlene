@@ -1,6 +1,9 @@
+const { ArrayLengthError } = require('./errors')
+
+
 const Matches = (a, b) => {
     if (a.length != b.length) {
-        throw new Error("[Error] Arrays length must be the same")
+        throw new ArrayLengthError("arrays length must be the same")
     }
 
     let same = true

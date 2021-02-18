@@ -1,6 +1,6 @@
-const { EncryptFlat, DecryptFlat } = require('../../utils/darlene')
-const { PrintContent } = require('../../utils/file')
-const { Matches } = require('../../utils/match')
+const { EncryptFlat, DecryptFlat }  = require('../../utils/darlene')
+const { PrintContent }              = require('../../utils/file')
+const { Matches }                   = require('../../utils/match')
 
 let secret = 'thisisnotsecure'
 
@@ -20,7 +20,8 @@ let blob = EncryptFlat(secret, words, {
     keylength: 128,
     encoding: 'base64',
     isJSON: true,
-    isBinary: false
+    isBinary: false,
+    ext: 'json'
 })
 
 PrintContent(blob)

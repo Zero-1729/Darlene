@@ -1,7 +1,7 @@
-const { PrintContent } = require('../../utils/file')
-const { GetMeta, WriteFile } = require('../../utils/file')
+const { PrintContent }                     = require('../../utils/file')
+const { GetMeta, WriteFile }               = require('../../utils/file')
 const { EncryptFileSync, DecryptFileSync } = require('../../utils/darlene')
-const { ReadInput } = require('../../utils/psswd')
+const { ReadInput }                        = require('../../utils/psswd')
 
 const path = require('path')
 
